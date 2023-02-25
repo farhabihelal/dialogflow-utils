@@ -122,31 +122,6 @@ class TriviaUploader:
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--db_path", dest="db_path", type=str, help="Books database path"
-    )
-
-    parser.add_argument(
-        "--project_id", dest="project_id", type=str, help="Google Cloud Project Id"
-    )
-    parser.add_argument(
-        "--credential",
-        dest="credential",
-        type=str,
-        help="Path to Google Cloud Project credential",
-    )
-
-    args = parser.parse_args()
-
-    # config = {
-    #     "db_path": args.db_path,
-    #     "credential": args.credential,
-    # }
-
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
     data_dir = os.path.join(base_dir, "data")
