@@ -1,0 +1,6 @@
+pandas
+black
+google-cloud-dialogflow
+spacy
+PyYAML
+openpyxl
