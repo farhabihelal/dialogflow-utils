@@ -53,6 +53,9 @@ class HumorUploader:
         return humor_data
 
     def load(self, db_path=None) -> dict:
+        self.api.get_intents()
+        self.api.generate_tree()
+
         db = self.load_db(db_path)
         humor_data = self.process_humors(db=db)
 
@@ -100,6 +103,11 @@ class HumorUploader:
                 humor_intent_obj.display_name = (
                     f"{type_intent_obj.display_name}-{i+1:03d}"
                 )
+                humor_intent_obj.input_context_names = [
+                    self.api.sessions_client.context_path(
+                        self.api.project_id, "-", type_intent_obj.display_name
+                    )
+                ]
                 humor_intent_obj.events = [humor_intent_obj.display_name]
                 humor_intent_obj.priority = -1
 
