@@ -38,6 +38,9 @@ class TriviaUploader:
         return trivia_data
 
     def load(self, db_path=None) -> dict:
+        self.api.get_intents()
+        self.api.generate_tree()
+
         db = read_xlsx(db_path)
         trivia_data = self.process_trivias(db=db)
 

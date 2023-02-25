@@ -9,6 +9,8 @@ from dialogflow_api.src.dialogflow import Dialogflow, Intent
 
 import google.cloud.dialogflow_v2 as dialogflow_v2
 
+from db.xlsx import read_xlsx
+
 
 class HumorUploader:
     def __init__(self, config: dict) -> None:
@@ -23,18 +25,6 @@ class HumorUploader:
 
     def configure(self, config: dict):
         self.config = config
-
-    def load_db(self, db_path=None) -> dict:
-        db_path = db_path if db_path else self.config["db_path"]
-
-        db = {}
-        self._xls = pd.ExcelFile(db_path)
-
-        for sheet in self._xls.sheet_names:
-            df = pd.read_excel(self._xls, sheet)
-            db[sheet] = df
-
-        return db
 
     def process_humors(self, db: dict = None) -> dict:
         db = db if db else self.db
@@ -56,7 +46,7 @@ class HumorUploader:
         self.api.get_intents()
         self.api.generate_tree()
 
-        db = self.load_db(db_path)
+        db = read_xlsx(db_path)
         humor_data = self.process_humors(db=db)
 
         self.db = db
