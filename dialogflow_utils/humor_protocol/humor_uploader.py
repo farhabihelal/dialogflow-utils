@@ -19,7 +19,7 @@ class HumorUploader:
         self.db = {}
         self.humor_data = {}
 
-        self.valid_sheet_names = ["Setup", "Punchline"]
+        self.valid_column_names = ["Setup", "Punchline"]
 
     def configure(self, config: dict):
         self.config = config
