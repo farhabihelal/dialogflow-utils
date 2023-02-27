@@ -3,10 +3,6 @@ import os
 
 sys.path.append(os.path.abspath(f"{os.path.dirname(__file__)}/.."))
 
-import pandas as pd
-
-from dialogflow_api.src.dialogflow import Dialogflow, Intent
-
 import google.cloud.dialogflow_v2 as dialogflow_v2
 
 from humor_uploader import HumorUploader
