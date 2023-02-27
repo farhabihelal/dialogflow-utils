@@ -37,7 +37,7 @@ class HumorUploaderCompressed(HumorUploader):
 
         # create humor root intent node
         root_intent_obj = dialogflow_v2.Intent()
-        root_intent_obj.display_name = self.process_intent_name("humor-compressed")
+        root_intent_obj.display_name = self.process_intent_name("humor-data-compressed")
         root_intent_obj.events = [root_intent_obj.display_name]
         root_intent_obj.priority = -1
 
