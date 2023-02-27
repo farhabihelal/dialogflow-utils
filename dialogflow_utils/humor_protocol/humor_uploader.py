@@ -24,6 +24,7 @@ class HumorUploader:
         self.valid_column_names = ["Setup", "Punchline"]
 
         self.break_duration = 3
+        self.use_break = True
 
     def configure(self, config: dict):
         self.config = config
@@ -36,18 +37,24 @@ class HumorUploader:
         for sheet in db:
             df: pd.DataFrame = db[sheet]
             setups = [str(x) if not pd.isna(x) else "" for x in df["Setup"].tolist()]
-            breaks = [
-                self.get_break_ssml(self.break_duration) for x in range(len(setups))
-            ]
             punchlines = [
                 str(x) if not pd.isna(x) else "" for x in df["Punchline"].tolist()
             ]
 
             humor_data[sheet] = [
-                (self.postprocess_db_text(x), y, self.postprocess_db_text(z))
-                if x
-                else ("", "", self.postprocess_db_text(z))
-                for x, y, z in zip(setups, breaks, punchlines)
+                (
+                    self.postprocess_db_text(x),
+                    self.get_break_ssml(self.break_duration),
+                    self.postprocess_db_text(y),
+                )
+                if x and self.use_break
+                else (
+                    self.postprocess_db_text(x),
+                    self.postprocess_db_text(y),
+                )
+                if x and not self.use_break
+                else ("", "", self.postprocess_db_text(y))
+                for x, y in zip(setups, punchlines)
             ]
         return humor_data
 
@@ -75,7 +82,7 @@ class HumorUploader:
 
         # create humor root intent node
         root_intent_obj = dialogflow_v2.Intent()
-        root_intent_obj.display_name = self.process_intent_name("humor")
+        root_intent_obj.display_name = self.process_intent_name("humor-data")
         root_intent_obj.events = [root_intent_obj.display_name]
         root_intent_obj.priority = -1
 
