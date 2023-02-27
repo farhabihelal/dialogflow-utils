@@ -23,6 +23,8 @@ class HumorUploader:
 
         self.valid_column_names = ["Setup", "Punchline"]
 
+        self.break_duration = 3
+
     def configure(self, config: dict):
         self.config = config
 
@@ -34,11 +36,14 @@ class HumorUploader:
         for sheet in db:
             df = db[sheet]
             setups = df["Setup"].tolist()
+            breaks = [
+                self.get_break_ssml(self.break_duration) for x in range(len(setups))
+            ]
             punchlines = df["Punchline"].tolist()
 
             humor_data[sheet] = [
-                (self.postprocess_db_text(x), self.postprocess_db_text(y))
-                for x, y in zip(setups, punchlines)
+                (self.postprocess_db_text(x), y, self.postprocess_db_text(z))
+                for x, y, z in zip(setups, breaks, punchlines)
             ]
         return humor_data
 
@@ -56,6 +61,9 @@ class HumorUploader:
 
     def process_intent_name(self, text: str) -> str:
         return text.replace(" ", "-").lower().strip()
+
+    def get_break_ssml(self, duration: int) -> str:
+        return f"<break type='4' time='{duration}'/>"
 
     def upload(self, humor_data: dict = None, language_code: str = None):
         humor_data = humor_data if humor_data else self.humor_data
@@ -135,7 +143,7 @@ if __name__ == "__main__":
 
     config = {
         "db_path": os.path.join(data_dir, "Haru Humor Protocol.xlsx"),
-        "credential": os.path.join(keys_dir, "haru-chat-games.json"),
+        "credential": os.path.join(keys_dir, "haru-test.json"),
         "language_code": "en",
     }
 
