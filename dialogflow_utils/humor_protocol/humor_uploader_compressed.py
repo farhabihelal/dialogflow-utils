@@ -80,7 +80,7 @@ class HumorUploaderCompressed(HumorUploader):
                 humor_intent_obj.messages = []
                 msg = dialogflow_v2.Intent.Message()
                 msg.text = dialogflow_v2.Intent.Message.Text(
-                    text=[" ".join(x) for x in humor_compressed]
+                    text=[" ".join(x).strip() for x in humor_compressed]
                 )
                 humor_intent_obj.messages.append(msg)
 
