@@ -31,8 +31,8 @@ class TriviaUploader:
         trivia_data = {}
 
         for sheet in db:
-            df = db[sheet]
-            trivias = df["Trivia"].tolist()
+            df: pd.DataFrame = db[sheet]
+            trivias = [str(x) if not pd.isna(x) else "" for x in df["Trivia"].tolist()]
             trivia_data[sheet] = trivias
 
         return trivia_data
