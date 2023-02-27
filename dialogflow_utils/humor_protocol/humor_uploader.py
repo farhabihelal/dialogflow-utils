@@ -34,15 +34,19 @@ class HumorUploader:
         humor_data = {}
 
         for sheet in db:
-            df = db[sheet]
-            setups = df["Setup"].tolist()
+            df: pd.DataFrame = db[sheet]
+            setups = [str(x) if not pd.isna(x) else "" for x in df["Setup"].tolist()]
             breaks = [
                 self.get_break_ssml(self.break_duration) for x in range(len(setups))
             ]
-            punchlines = df["Punchline"].tolist()
+            punchlines = [
+                str(x) if not pd.isna(x) else "" for x in df["Punchline"].tolist()
+            ]
 
             humor_data[sheet] = [
                 (self.postprocess_db_text(x), y, self.postprocess_db_text(z))
+                if x
+                else ("", "", self.postprocess_db_text(z))
                 for x, y, z in zip(setups, breaks, punchlines)
             ]
         return humor_data
@@ -122,8 +126,8 @@ class HumorUploader:
                 intents=humor_intent_objs, language_code=language_code
             )
 
-    def postprocess_db_text(self, text):
-        text = str(text)
+    def postprocess_db_text(self, text) -> str:
+        text = "" if not text else str(text)
         return text.strip()
 
     def run(self, db_path=None):
