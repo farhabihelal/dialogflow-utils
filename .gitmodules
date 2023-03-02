@@ -1,3 +1,6 @@
 [submodule "dialogflow_utils/dialogflow_api"]
 	path = dialogflow_utils/dialogflow_api
 	url = https://github.com/haru-project/dialogflow-api.git
+[submodule "dialogflow_utils/dialogflow_payload_utils"]
+	path = dialogflow_utils/dialogflow_payload_utils
+	url = https://github.com/farhabi-helal-hri/dialogflow_payload_utils.git
