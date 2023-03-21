@@ -27,6 +27,119 @@ class WYRGenerator:
     def configure(self, config: dict):
         self.config = config
 
+    def create_wyr_structure(
+        self, parent_intent_name: str = None, language_code: str = None
+    ):
+        parent = (
+            self.api.intents["display_name"][parent_intent_name]
+            if parent_intent_name
+            else None
+        )
+
+        wyr_root_intent_name = "would-you-rather"
+
+        root_intent_obj = (
+            dialogflow_v2.Intent()
+            if not self.api.intents["display_name"].get(wyr_root_intent_name)
+            else self.api.intents["display_name"][wyr_root_intent_name].intent_obj
+        )
+        root_intent_obj.display_name = wyr_root_intent_name
+        root_intent_obj.events = [root_intent_obj.display_name]
+        root_intent_obj.priority = 0
+        root_intent_obj.action = "play-wyr"
+
+        root_intent_obj.messages = [
+            dialogflow_v2.Intent.Message(
+                text=dialogflow_v2.Intent.Message.Text(["OK!"])
+            )
+        ]
+
+        root_intent = Intent(root_intent_obj)
+
+        if parent:
+            root_intent = self.api.create_child(
+                intent=root_intent, parent=parent, language_code=language_code
+            )
+            root_intent_obj = root_intent.intent_obj
+        else:
+            root_intent_obj: dialogflow_v2.Intent = (
+                self.api.create_intent(
+                    intent=root_intent_obj, language_code=language_code
+                )
+                if not self.api.intents["display_name"].get(
+                    root_intent_obj.display_name
+                )
+                else self.api.update_intent(
+                    intent=root_intent_obj, language_code=language_code
+                )
+            )
+            root_intent._intent_obj = root_intent_obj
+
+        intents = []
+
+        # outro
+        outro_intent_obj = dialogflow_v2.Intent()
+        outro_intent_obj.display_name = f"{root_intent_obj.display_name}-outro"
+        outro_intent_obj.events = [outro_intent_obj.display_name]
+        outro_intent_obj.parent_followup_intent_name = root_intent_obj.name
+        outro_intent_obj.action = "game-prompt-advanced"
+
+        outro_intent_obj.messages = []
+        outro_intent_obj.messages.append(
+            dialogflow_v2.Intent.Message(
+                text=dialogflow_v2.Intent.Message.Text(text=["That was awesome!"])
+            )
+        )
+
+        intent = Intent(outro_intent_obj)
+        intents.append(intent)
+
+        # tells choices
+        tells_choices_intent_obj = dialogflow_v2.Intent()
+        tells_choices_intent_obj.display_name = (
+            f"{root_intent_obj.display_name}-tells-choices"
+        )
+        tells_choices_intent_obj.events = [tells_choices_intent_obj.display_name]
+        tells_choices_intent_obj.parent_followup_intent_name = root_intent_obj.name
+        tells_choices_intent_obj.action = "would-you-rather-choices"
+
+        # WYR Choice Param 1
+        tells_choices_intent_obj.parameters = []
+        parameter = dialogflow_v2.Intent.Parameter()
+        parameter.display_name = f"wyr_choice_1"
+        parameter.default_value = ""
+        parameter.entity_type_display_name = "@sys.any"
+        parameter.is_list = False
+        parameter.mandatory = False
+        parameter.value = ""
+        tells_choices_intent_obj.parameters.append(parameter)
+
+        # WYR Choice Param 2
+        parameter = dialogflow_v2.Intent.Parameter()
+        parameter.display_name = f"wyr_choice_2"
+        parameter.default_value = ""
+        parameter.entity_type_display_name = "@sys.any"
+        parameter.is_list = False
+        parameter.mandatory = False
+        parameter.value = ""
+        tells_choices_intent_obj.parameters.append(parameter)
+
+        tells_choices_intent_obj.messages = []
+        tells_choices_intent_obj.messages.append(
+            dialogflow_v2.Intent.Message(
+                text=dialogflow_v2.Intent.Message.Text(
+                    text=["Would you rather $wyr_choice_1 or $wyr_choice_2?"]
+                )
+            )
+        )
+
+        intent = Intent(tells_choices_intent_obj)
+        intents.append(intent)
+
+        self.api.create_children(
+            intents=intents, parent=root_intent, language_code=language_code
+        )
+
     def create_wyrs(
         self,
         wyr_data: list,
@@ -154,9 +267,6 @@ class WYRGenerator:
             intents=wyr_intents, parent=root_intent, language_code=language_code
         )
 
-    def create_wyr_intro(self):
-        pass
-
     def get_training_data(self, text: str) -> list:
         training_data = []
 
@@ -193,12 +303,19 @@ class WYRGenerator:
         parent_intent_name: str = None,
         language_code: str = None,
     ):
-        wyr_data: list = self.parser.run(db_path=db_path)
-        self.create_wyrs(
-            wyr_data=wyr_data,
+        self.create_wyr_structure(
             parent_intent_name=parent_intent_name
             if parent_intent_name
             else self.config["parent_intent_name"],
+            language_code=language_code
+            if language_code
+            else self.config["language_code"],
+        )
+
+        wyr_data: list = self.parser.run(db_path=db_path)
+        self.create_wyrs(
+            wyr_data=wyr_data,
+            parent_intent_name="would-you-rather-tells-choices",
             language_code=language_code
             if language_code
             else self.config["language_code"],
@@ -233,8 +350,8 @@ if __name__ == "__main__":
 
     config = {
         "db_path": os.path.join(data_dir, "would-you-rather-scripts.xlsx"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
-        "parent_intent_name": "would-you-rather-tells-choices",
+        "credential": os.path.join(keys_dir, "haru-chat-games.json"),
+        "parent_intent_name": "",
         "language_code": "en",
     }
     gen = WYRGenerator(config)
