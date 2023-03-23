@@ -13,12 +13,14 @@ from time import sleep
 class SentimentGenerator:
     def __init__(self, config: dict) -> None:
         self.configure(config)
-        self.api = Dialogflow(config)
-        self.api.get_intents()
-        self.api.generate_tree()
+
+        self.api = self.config.get("api")
+        if not self.api:
+            self.api = Dialogflow(config)
+            self.api.get_intents()
+            self.api.generate_tree()
 
         self.valid_sentiments = ["positive", "negative", "neutral"]
-        pass
 
     def configure(self, config: dict):
         self.config = config
@@ -53,6 +55,7 @@ class SentimentGenerator:
         intent_obj = dialogflow_v2.Intent()
         intent_obj.display_name = f"{parent.display_name}-{sentiment}"
         intent_obj.events = [intent_obj.display_name]
+        intent_obj.action = self.get_action(parent)
         intent_obj.messages.append(
             dialogflow_v2.Intent.Message(
                 text=dialogflow_v2.Intent.Message.Text(
@@ -63,12 +66,36 @@ class SentimentGenerator:
         intent = Intent(intent_obj)
         return intent
 
-    def run(self, intent_names=None, language_code="en"):
+    def get_action(self, parent: Intent):
+        action = ""
+
+        if parent.intent_obj.action:
+            action = parent.intent_obj.action
+
+        elif len(parent.children) == 1:
+            action = parent.children[0].intent_obj.action
+
+        elif len(parent.children) > 1:
+            for x in parent.children:
+                x: Intent
+                if x.intent_obj.is_fallback:
+                    action = x.intent_obj.action
+
+        return action
+
+    def run(self, intent_names=None, language_code="en", refresh=True):
+        if refresh:
+            self.api.get_intents()
+            self.api.generate_tree()
+
         parent_names = intent_names if intent_names else self.config["intent_names"]
 
         for parent_name in parent_names:
             parent_name: str
-            parent: Intent = self.api.intents["display_name"][parent_name]
+            parent: Intent = self.api.intents["display_name"].get(parent_name)
+            if not parent:
+                print(f"Parent intent `{parent_name}` not found.")
+                continue
             sentiment_intents: dict = self.get_sentiment_intents(parent)
 
             self.add_metadata(parent, sentiment_intents)
@@ -78,20 +105,25 @@ class SentimentGenerator:
                 parent=parent,
                 language_code=language_code,
             )
-            sleep(0.5)
+
+            # remove action from parent
+            parent.intent_obj.action = ""
+            self.api.update_intent(
+                intent=parent.intent_obj, language_code=language_code
+            )
+            sleep(2)
 
 
 if __name__ == "__main__":
 
-    intent_names = [
-        "topic-name-react-feeling",
-    ]
+    intent_names = []
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "api": None,
+        "credential": os.path.join(keys_dir, "es.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
