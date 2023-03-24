@@ -39,6 +39,8 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
         dummy_intent_obj.events = [dummy_intent_obj.display_name]
 
         dummy_intent = Intent(dummy_intent_obj)
+
+        parent.intent_obj.action = dummy_intent_obj.display_name
         dummy_intent = self.api.create_child(
             intent=dummy_intent, parent=parent, language_code=language_code
         )
@@ -75,28 +77,49 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
                 language_code=language_code,
             )
 
-            # remove action from parent
-            if parent.intent_obj.action:
-                parent.intent_obj.action = ""
-                self.api.update_intent(
-                    intent=parent.intent_obj, language_code=language_code
-                )
-            sleep(2)
+            print(f"{parent_name}: success")
+            sleep(20)
 
 
 if __name__ == "__main__":
 
-    intent_names = ["haru-games"]
+    intent_names = [
+        # intro
+        # "topic-intro-engage-smalltalk-must-fallback",
+        # "topic-intro-name-double-check-fallback",
+        # age
+        # "topic-day-one-session-one-age-again-fallback",
+        # "topic-day-one-session-one-age-fallback",
+        # "topic-day-one-session-one-age-parents-fallback"
+        # "topic-day-one-session-one-age-grandparents-fallback",
+        # "topic-day-one-session-one-age-parents-job-sarcastic-handle-fallback",
+        # names origins
+        "topic-day-one-session-one-names-origins-meaning-fallback",
+        "topic-day-one-session-one-names-origins-meaning-haru-fallback",
+        "topic-day-one-session-one-names-happy-with-name-fallback",
+        "topic-day-one-session-one-remembering-names-fallback",
+        "topic-day-one-session-one-haru-name-fallback",
+        "topic-day-one-session-one-last-name-fallback",
+        "topic-day-one-session-one-confirm-last-name-fallback",
+        "topic-day-one-session-one-family-name-capture-again-fallback",
+        "topic-day-one-session-one-family-name-double-check-fallback",
+        "topic-day-one-session-one-collect-name-origin-fallback",
+        "topic-day-one-session-one-haru-origin-fallback",
+        "topic-day-one-session-one-ever-been-fallback",
+        "topic-day-one-session-one-collect-name-origin-sarcastic-handle-fallback",
+        "topic-day-one-session-one-collect-name-origin-confirm-fallback",
+        "topic-day-one-session-one-haru-origin-sarcastic-handle-fallback",
+    ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
         "api": None,
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "es.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
 
-    gen = SentimentGenerator(config)
+    gen = SentimentGeneratorUnsafe(config)
     gen.run()

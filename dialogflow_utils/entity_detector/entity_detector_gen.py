@@ -27,11 +27,23 @@ class EntityDetectorGenerator:
 
     def create_entity_detector(self, parent: Intent, language_code: str = None):
 
+        # fallback node
+        fallback_nodes = [x for x in parent.children if x.intent_obj.is_fallback]
+        fallback_intent: Intent = None
+
+        if len(fallback_nodes) == 1:
+            fallback_intent = fallback_nodes[0]
+
+        elif len(fallback_nodes) > 1:
+            raise ValueError(
+                f"multiple fallback found for intent `{parent.display_name}`!".capitalize()
+            )
+
         # capture node
         capture_intent_obj = dialogflow_v2.Intent()
         capture_intent_obj.display_name = f"{parent.display_name}-entity-capture"
         capture_intent_obj.events = [capture_intent_obj.display_name]
-        capture_intent_obj.action = f""
+        capture_intent_obj.action = f"verify-entity"
         capture_intent_obj.messages = [
             dialogflow_v2.Intent.Message(payload={"local_entity_detection": ""})
         ]
@@ -66,6 +78,7 @@ class EntityDetectorGenerator:
             f"{capture_intent_obj.display_name}-failure"
         )
         capture_failure_intent_obj.events = [capture_failure_intent_obj.display_name]
+        capture_failure_intent_obj.action = f""
         capture_failure_intent = Intent(capture_failure_intent_obj)
 
         intents = [capture_success_intent, capture_failure_intent]
@@ -75,22 +88,23 @@ class EntityDetectorGenerator:
         )
 
         # fallback node
-        fallback_intent_obj = dialogflow_v2.Intent()
-        fallback_intent_obj.display_name = f"{parent.display_name}-fallback"
-        fallback_intent_obj.events = [fallback_intent_obj.display_name]
-        fallback_intent_obj.action = f""
-        fallback_intent_obj.messages = [
-            dialogflow_v2.Intent.Message(payload={"local_entity_detection": ""})
-        ]
+        if not fallback_intent:
+            fallback_intent_obj = dialogflow_v2.Intent()
+            fallback_intent_obj.display_name = f"{parent.display_name}-fallback"
+            fallback_intent_obj.events = [fallback_intent_obj.display_name]
+            fallback_intent_obj.action = f""
+            fallback_intent_obj.messages = [
+                dialogflow_v2.Intent.Message(payload={"local_entity_detection": ""})
+            ]
 
-        fallback_intent = Intent(fallback_intent_obj)
-        fallback_intent = self.api.create_child(
-            intent=fallback_intent, parent=parent, language_code=language_code
-        )
+            fallback_intent = Intent(fallback_intent_obj)
+            fallback_intent = self.api.create_child(
+                intent=fallback_intent, parent=parent, language_code=language_code
+            )
 
         sent_config = {
             "api": self.api,
-            "intent_names": [capture_failure_intent.display_name],
+            "intent_names": [fallback_intent.display_name],
             "language_code": language_code,
         }
         sent_gen = SentimentGeneratorUnsafe(sent_config)

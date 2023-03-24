@@ -57,6 +57,9 @@ class SentimentGenerator:
         intent_obj.events = [intent_obj.display_name]
         intent_obj.action = self.get_action(parent)
         intent_obj.messages.append(
+            dialogflow_v2.Intent.Message(payload={"node_type": "RepeatNode"})
+        )
+        intent_obj.messages.append(
             dialogflow_v2.Intent.Message(
                 text=dialogflow_v2.Intent.Message.Text(
                     text=[f"this is {sentiment} sentiment path.".title()]
