@@ -4,3 +4,4 @@ google-cloud-dialogflow
 spacy
 PyYAML
 openpyxl
+prompt-toolkit
