@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(f"{os.path.dirname(__file__)}/.."))
 
 import google.cloud.dialogflow_v2 as dialogflow_v2
 
-from trivia_uploader import TriviaUploader
+from trivia_uploader import TriviaUploader, Intent
 
 
 class TriviaUploaderCompressed(TriviaUploader):
@@ -39,11 +39,29 @@ class TriviaUploaderCompressed(TriviaUploader):
             "trivia-data-compressed"
         )
         root_intent_obj.events = [root_intent_obj.display_name]
-        root_intent_obj.priority = -1
+        root_intent_obj.priority = 0
+        root_intent_obj.input_context_names = [
+            self.api.sessions_client.context_path(
+                self.api.project_id, "-", f"{root_intent_obj.display_name}"
+            )
+        ]
+        root_intent_obj.parent_followup_intent_name = ""
+
+        followup_context = dialogflow_v2.Context()
+        followup_context.name = self.api.sessions_client.context_path(
+            self.api.project_id, "-", f"{root_intent_obj.display_name}-followup"
+        )
+        followup_context.lifespan_count = 1
+        followup_context.parameters = {}
+        root_intent_obj.output_contexts = [followup_context]
 
         root_intent_obj: dialogflow_v2.Intent = self.api.create_intent(
             intent=root_intent_obj, language_code=language_code
         )
+        root_intent = Intent(root_intent_obj)
+
+        self.api.intents["name"][root_intent.name] = root_intent
+        self.api.intents["display_name"][root_intent.display_name] = root_intent
 
         # create trivia type intent and it's children
         for trivia_type in trivia_data:
@@ -54,40 +72,61 @@ class TriviaUploaderCompressed(TriviaUploader):
                 f"{self.process_intent_name(trivia_type)}-compressed"
             )
             type_intent_obj.events = [type_intent_obj.display_name]
-            type_intent_obj.priority = -1
+            type_intent_obj.priority = 0
 
-            type_intent_obj: dialogflow_v2.Intent = self.api.create_intent(
-                type_intent_obj, language_code=language_code
-            )
+            # type_intent_obj.input_context_names = [
+            #     x.name for x in root_intent_obj.output_contexts
+            # ]
+
+            # followup_context = dialogflow_v2.Context()
+            # followup_context.name = self.api.sessions_client.context_path(
+            #     self.api.project_id, "-", f"{type_intent_obj.display_name}-followup"
+            # )
+            # followup_context.lifespan_count = 1
+            # followup_context.parameters = None
+            # type_intent_obj.output_contexts = [followup_context]
+
+            # type_intent_obj: dialogflow_v2.Intent = self.api.create_intent(
+            #     type_intent_obj, language_code=language_code
+            # )
+
+            type_intent = self.api.create_child(Intent(type_intent_obj), root_intent)
 
             trivias_compressed = trivia_data[trivia_type]
-            trivia_intent_objs = []
+            trivia_intents = []
             for i, trivia_compressed in enumerate(trivias_compressed):
                 trivia_compressed: list
                 trivia_intent_obj = dialogflow_v2.Intent()
-                trivia_intent_obj.parent_followup_intent_name = type_intent_obj.name
-                trivia_intent_obj.display_name = (
-                    f"{type_intent_obj.display_name}-{i+1:03d}"
-                )
-                trivia_intent_obj.input_context_names = [
-                    self.api.sessions_client.context_path(
-                        self.api.project_id, "-", type_intent_obj.display_name
-                    )
-                ]
+                # trivia_intent_obj.parent_followup_intent_name = type_intent.name
+                trivia_intent_obj.display_name = f"{type_intent.display_name}-{i+1:03d}"
+                # trivia_intent_obj.input_context_names = [
+                #     self.api.sessions_client.context_path(
+                #         self.api.project_id, "-", type_intent_obj.display_name
+                #     )
+                # ]
                 trivia_intent_obj.events = [trivia_intent_obj.display_name]
-                trivia_intent_obj.priority = -1
+                trivia_intent_obj.priority = 0
+                trivia_intent_obj.action = "trivia-outro"
+
+                # trivia_intent_obj.input_context_names = [
+                #     x.name for x in type_intent_obj.output_contexts
+                # ]
 
                 trivia_intent_obj.messages = []
                 msg = dialogflow_v2.Intent.Message()
                 msg.text = dialogflow_v2.Intent.Message.Text(
-                    text=[x for x in trivia_compressed]
+                    text=[x.strip() for x in trivia_compressed]
                 )
                 trivia_intent_obj.messages.append(msg)
 
-                trivia_intent_objs.append(trivia_intent_obj)
+                trivia_intents.append(Intent(trivia_intent_obj))
 
-            result = self.api.batch_update_intents(
-                intents=trivia_intent_objs, language_code=language_code
+            # result = self.api.batch_update_intents(
+            #     intents=trivia_intent_objs, language_code=language_code
+            # )
+
+            self.api.create_children(
+                intents=trivia_intents, parent=type_intent, language_code=language_code
             )
 
 
@@ -98,7 +137,7 @@ if __name__ == "__main__":
 
     config = {
         "db_path": os.path.join(data_dir, "Haru Trivia Protocol.xlsx"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "haru-chat-games.json"),
         "language_code": "en",
     }
 

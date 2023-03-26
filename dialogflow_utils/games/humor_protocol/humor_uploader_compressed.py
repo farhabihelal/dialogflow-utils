@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(f"{os.path.dirname(__file__)}/.."))
 
 import google.cloud.dialogflow_v2 as dialogflow_v2
 
-from humor_uploader import HumorUploader
+from humor_uploader import HumorUploader, Intent
 
 
 class HumorUploaderCompressed(HumorUploader):
@@ -35,11 +35,29 @@ class HumorUploaderCompressed(HumorUploader):
         root_intent_obj = dialogflow_v2.Intent()
         root_intent_obj.display_name = self.process_intent_name("humor-data-compressed")
         root_intent_obj.events = [root_intent_obj.display_name]
-        root_intent_obj.priority = -1
+        root_intent_obj.priority = 0
+        root_intent_obj.input_context_names = [
+            self.api.sessions_client.context_path(
+                self.api.project_id, "-", f"{root_intent_obj.display_name}"
+            )
+        ]
+        root_intent_obj.parent_followup_intent_name = ""
+
+        followup_context = dialogflow_v2.Context()
+        followup_context.name = self.api.sessions_client.context_path(
+            self.api.project_id, "-", f"{root_intent_obj.display_name}-followup"
+        )
+        followup_context.lifespan_count = 1
+        followup_context.parameters = {}
+        root_intent_obj.output_contexts = [followup_context]
 
         root_intent_obj: dialogflow_v2.Intent = self.api.create_intent(
             intent=root_intent_obj, language_code=language_code
         )
+        root_intent = Intent(root_intent_obj)
+
+        self.api.intents["name"][root_intent.name] = root_intent
+        self.api.intents["display_name"][root_intent.display_name] = root_intent
 
         # create humor type intent and it's children
         for humor_type in humor_data:
@@ -50,28 +68,45 @@ class HumorUploaderCompressed(HumorUploader):
                 f"{self.process_intent_name(humor_type)}-compressed"
             )
             type_intent_obj.events = [type_intent_obj.display_name]
-            type_intent_obj.priority = -1
+            type_intent_obj.priority = 0
 
-            type_intent_obj: dialogflow_v2.Intent = self.api.create_intent(
-                type_intent_obj, language_code=language_code
-            )
+            # type_intent_obj.input_context_names = [
+            #     x.name for x in root_intent_obj.output_contexts
+            # ]
+
+            # followup_context = dialogflow_v2.Context()
+            # followup_context.name = self.api.sessions_client.context_path(
+            #     self.api.project_id, "-", f"{type_intent_obj.display_name}-followup"
+            # )
+            # followup_context.lifespan_count = 1
+            # followup_context.parameters = None
+            # type_intent_obj.output_contexts = [followup_context]
+
+            # type_intent_obj: dialogflow_v2.Intent = self.api.create_intent(
+            #     type_intent_obj, language_code=language_code
+            # )
+
+            type_intent = self.api.create_child(Intent(type_intent_obj), root_intent)
 
             humors_compressed = humor_data[humor_type]
-            humor_intent_objs = []
+            humor_intents = []
             for i, humor_compressed in enumerate(humors_compressed):
                 humor_compressed: list
                 humor_intent_obj = dialogflow_v2.Intent()
-                humor_intent_obj.parent_followup_intent_name = type_intent_obj.name
-                humor_intent_obj.display_name = (
-                    f"{type_intent_obj.display_name}-{i+1:03d}"
-                )
-                humor_intent_obj.input_context_names = [
-                    self.api.sessions_client.context_path(
-                        self.api.project_id, "-", type_intent_obj.display_name
-                    )
-                ]
+                # humor_intent_obj.parent_followup_intent_name = type_intent.name
+                humor_intent_obj.display_name = f"{type_intent.display_name}-{i+1:03d}"
+                # humor_intent_obj.input_context_names = [
+                #     self.api.sessions_client.context_path(
+                #         self.api.project_id, "-", type_intent_obj.display_name
+                #     )
+                # ]
                 humor_intent_obj.events = [humor_intent_obj.display_name]
-                humor_intent_obj.priority = -1
+                humor_intent_obj.priority = 0
+                humor_intent_obj.action = "humor-outro"
+
+                # humor_intent_obj.input_context_names = [
+                #     x.name for x in type_intent_obj.output_contexts
+                # ]
 
                 humor_intent_obj.messages = []
                 msg = dialogflow_v2.Intent.Message()
@@ -80,10 +115,14 @@ class HumorUploaderCompressed(HumorUploader):
                 )
                 humor_intent_obj.messages.append(msg)
 
-                humor_intent_objs.append(humor_intent_obj)
+                humor_intents.append(Intent(humor_intent_obj))
 
-            result = self.api.batch_update_intents(
-                intents=humor_intent_objs, language_code=language_code
+            # result = self.api.batch_update_intents(
+            #     intents=humor_intent_objs, language_code=language_code
+            # )
+
+            self.api.create_children(
+                intents=humor_intents, parent=type_intent, language_code=language_code
             )
 
 
@@ -94,7 +133,7 @@ if __name__ == "__main__":
 
     config = {
         "db_path": os.path.join(data_dir, "Haru Humor Protocol.xlsx"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "haru-chat-games.json"),
         "language_code": "en",
     }
 
