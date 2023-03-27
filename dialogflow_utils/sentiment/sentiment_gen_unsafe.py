@@ -37,6 +37,11 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
         dummy_intent_obj = dialogflow_v2.Intent()
         dummy_intent_obj.display_name = f"{parent.display_name}-dummy"
         dummy_intent_obj.events = [dummy_intent_obj.display_name]
+        # dummy_intent_obj.priority = -1
+
+        dummy_intent_obj.messages = [
+            dialogflow_v2.Intent.Message(payload={"node_type": "DisabledNode"})
+        ]
 
         dummy_intent = Intent(dummy_intent_obj)
 
