@@ -69,8 +69,10 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             payload.update({"sentiment_classification_override": {}})
             parent.custom_payload = payload
 
-            # create child updates parent
-            # self.api.update_intent(intent=parent, language_code=language_code)
+            # update parent
+            parent._intent_obj = self.api.update_intent(
+                intent=parent, language_code=language_code
+            )
 
             dummy_intent: Intent = self.create_dummy(parent)
             sentiment_intents: dict = self.get_sentiment_intents(dummy_intent)
