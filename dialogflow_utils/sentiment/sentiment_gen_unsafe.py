@@ -58,7 +58,7 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
 
         parent_names = intent_names if intent_names else self.config["intent_names"]
 
-        for parent_name in parent_names:
+        for i, parent_name in enumerate(parent_names):
             parent_name: str
             parent: Intent = self.api.intents["display_name"].get(parent_name)
             if not parent:
@@ -70,9 +70,9 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             parent.custom_payload = payload
 
             # update parent
-            parent._intent_obj = self.api.update_intent(
-                intent=parent, language_code=language_code
-            )
+            # parent._intent_obj = self.api.update_intent(
+            #     intent=parent, language_code=language_code
+            # )
 
             dummy_intent: Intent = self.create_dummy(parent)
             sentiment_intents: dict = self.get_sentiment_intents(dummy_intent)
@@ -85,7 +85,9 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             )
 
             print(f"{parent_name}: success")
-            sleep(20)
+
+            if i + 1 < len(parent_names):
+                sleep(10)
 
 
 if __name__ == "__main__":
@@ -101,21 +103,41 @@ if __name__ == "__main__":
         # "topic-day-one-session-one-age-grandparents-fallback",
         # "topic-day-one-session-one-age-parents-job-sarcastic-handle-fallback",
         # names origins
-        "topic-day-one-session-one-names-origins-meaning-fallback",
-        "topic-day-one-session-one-names-origins-meaning-haru-fallback",
-        "topic-day-one-session-one-names-happy-with-name-fallback",
-        "topic-day-one-session-one-remembering-names-fallback",
-        "topic-day-one-session-one-haru-name-fallback",
-        "topic-day-one-session-one-last-name-fallback",
-        "topic-day-one-session-one-confirm-last-name-fallback",
-        "topic-day-one-session-one-family-name-capture-again-fallback",
-        "topic-day-one-session-one-family-name-double-check-fallback",
-        "topic-day-one-session-one-collect-name-origin-fallback",
-        "topic-day-one-session-one-haru-origin-fallback",
-        "topic-day-one-session-one-ever-been-fallback",
-        "topic-day-one-session-one-collect-name-origin-sarcastic-handle-fallback",
-        "topic-day-one-session-one-collect-name-origin-confirm-fallback",
-        "topic-day-one-session-one-haru-origin-sarcastic-handle-fallback",
+        # "topic-day-one-session-one-names-origins-meaning-fallback",
+        # "topic-day-one-session-one-names-origins-meaning-haru-fallback",
+        # "topic-day-one-session-one-names-happy-with-name-fallback",
+        # "topic-day-one-session-one-remembering-names-fallback",
+        # "topic-day-one-session-one-haru-name-fallback",
+        # "topic-day-one-session-one-last-name-fallback",
+        # "topic-day-one-session-one-confirm-last-name-fallback",
+        # "topic-day-one-session-one-family-name-capture-again-fallback",
+        # "topic-day-one-session-one-family-name-double-check-fallback",
+        # "topic-day-one-session-one-collect-name-origin-fallback",
+        # "topic-day-one-session-one-haru-origin-fallback",
+        # "topic-day-one-session-one-ever-been-fallback",
+        # "topic-day-one-session-one-collect-name-origin-sarcastic-handle-fallback",
+        # "topic-day-one-session-one-collect-name-origin-confirm-fallback",
+        # "topic-day-one-session-one-haru-origin-sarcastic-handle-fallback",
+        # hometown
+        # "topic-hometown-fallback",
+        # "topic-hometown-still-live-there-fallback",
+        # "topic-hometown-still-live-there-no-fallback",
+        # "topic-hometown-unknown-type-of-building",
+        # "topic-hometown-looking-for-a-new-roommate-fallback",
+        # "topic-hometown-new-roommate-yes-reaction",
+        # "topic-hometown-looking-for-a-new-roommate-no-reaction",
+        "topic-hometown-not-from-homecountry-capture-birthcountry",
+        "topic-hometown-homecountry-live-now-fallback",
+        "topic-hometown-what-question-fallback",
+        # travel homecountry
+        # "topic-travel-homecountry-human-guesses-harus-from-non-japan-country",
+        # "topic-travel-homecountry-human-from-other-country",
+        # "topic-travel-homecountry-human-unsure-about-haru-visiting",
+        # "topic-travel-homecountry-favorite-hemisphere-any-answer",
+        # "topic-travel-homecountry-human-been-to-sweden-fallback",
+        # "topic-travel-homecountry-human-seen-the-northern-lights-fallback",
+        # "topic-travel-homecountry-wants-to-know-where-the-lights-come-from",
+        # "topic-travel-homecountry-loves-how-humans-interact-with-nature",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
