@@ -113,7 +113,7 @@ class EntityDetectorGenerator:
     def run(self, intent_names=None, language_code="en"):
         parent_names = intent_names if intent_names else self.config["intent_names"]
 
-        for parent_name in parent_names:
+        for i, parent_name in enumerate(parent_names):
             parent_name: str
             parent: Intent = self.api.intents["display_name"].get(parent_name)
             if not parent:
@@ -129,17 +129,25 @@ class EntityDetectorGenerator:
 
             self.create_entity_detector(parent, language_code)
 
-            sleep(2)
+            print(f"{parent_name}: success")
+            if i + 1 < len(parent_names):
+                sleep(10)
 
 
 if __name__ == "__main__":
 
-    intent_names = ["haru-games"]
+    intent_names = [
+        # pet
+        "topic-pet-multiple-age",
+        "topic-pet-how-old-question",
+        # lemurs
+    ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
+        # "credential": os.path.join(keys_dir, "es.json"),
         "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
