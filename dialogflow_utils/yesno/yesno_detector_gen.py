@@ -125,7 +125,7 @@ class YesNoDetectorGenerator:
     def run(self, intent_names=None, language_code="en"):
         parent_names = intent_names if intent_names else self.config["intent_names"]
 
-        for parent_name in parent_names:
+        for i, parent_name in enumerate(parent_names):
             parent_name: str
             parent: Intent = self.api.intents["display_name"].get(parent_name)
             if not parent:
@@ -140,7 +140,7 @@ class YesNoDetectorGenerator:
                 "AnswerQuestionNode",
             ]:
                 raise ValueError(
-                    f"`{parent.display_name}` has invalid node type. Expecting type `QuestionNode` but found `{parent_node_type}`"
+                    f"`{parent.display_name}` has invalid node type. Expecting type [`QuestionNode`, `AnswerQuestionNode`] but found `{parent_node_type}`"
                 )
 
             payload: dict = parent.custom_payload
@@ -156,7 +156,9 @@ class YesNoDetectorGenerator:
 
             self.create_yesno_detector(parent, language_code)
 
-            sleep(2)
+            print(f"{parent_name}: success")
+            if i + 1 < len(parent_names):
+                sleep(10)
 
 
 if __name__ == "__main__":
@@ -165,25 +167,25 @@ if __name__ == "__main__":
         # pet
         # "topic-pet-cat-followup",
         # "topic-pet-bird-followup",
-        "topic-pet-hypothetical-pet-refresh-harder-cat",
-        "topic-pet-hypothetical-pet-refresh-harder-dog",
+        # "topic-pet-hypothetical-pet-refresh-harder-cat",
+        # "topic-pet-hypothetical-pet-refresh-harder-dog",
         # lemurs
-        "topic-lemurs-destination-merge",
-        "topic-lemurs-are-from",
-        "topic-lemurs-pet-collected",
-        "topic-lemurs-fav-animal-collected",
-        "topic-lemurs-no-animal-collected",
-        "topic-lemurs-pet-collected-home-country-collected",
-        "topic-lemurs-pet-collected-home-country-not-collected",
-        "topic-lemurs-user-would-mind-no",
+        # "topic-lemurs-destination-merge",
+        # "topic-lemurs-are-from",
+        # "topic-lemurs-pet-collected",
+        # "topic-lemurs-fav-animal-collected",
+        # "topic-lemurs-no-animal-collected",
+        # "topic-lemurs-pet-collected-home-country-collected",
+        # "topic-lemurs-pet-collected-home-country-not-collected",
+        # "topic-lemurs-user-would-mind-no",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
-        "credential": os.path.join(keys_dir, "es.json"),
-        # "credential": os.path.join(keys_dir, "haru-test.json"),
+        # "credential": os.path.join(keys_dir, "es.json"),
+        "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
