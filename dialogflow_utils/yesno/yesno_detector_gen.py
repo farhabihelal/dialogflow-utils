@@ -26,7 +26,7 @@ class YesNoDetectorGenerator:
         self.config = config
 
     def create_yesno_detector(self, parent: Intent, language_code: str = None):
-
+        create_sentiments = False
         # fallback node
         fallback_nodes = [x for x in parent.children if x.intent_obj.is_fallback]
         fallback_intent: Intent = None
@@ -88,6 +88,7 @@ class YesNoDetectorGenerator:
 
         # fallback node
         if not fallback_intent:
+            create_sentiments = True
             fallback_intent_obj = dialogflow_v2.Intent()
             fallback_intent_obj.display_name = f"{parent.display_name}-fallback"
             fallback_intent_obj.events = [fallback_intent_obj.display_name]
@@ -114,13 +115,14 @@ class YesNoDetectorGenerator:
 
         sleep(5)
 
-        sent_config = {
-            "api": self.api,
-            "intent_names": [fallback_intent.display_name],
-            "language_code": language_code,
-        }
-        sent_gen = SentimentGeneratorUnsafe(sent_config)
-        sent_gen.run()
+        if create_sentiments:
+            sent_config = {
+                "api": self.api,
+                "intent_names": [fallback_intent.display_name],
+                "language_code": language_code,
+            }
+            sent_gen = SentimentGeneratorUnsafe(sent_config)
+            sent_gen.run()
 
     def run(self, intent_names=None, language_code="en"):
         parent_names = intent_names if intent_names else self.config["intent_names"]
@@ -162,8 +164,9 @@ class YesNoDetectorGenerator:
 
 
 if __name__ == "__main__":
-
     intent_names = [
+        # family
+        "topic-day-two-family-siblings-not-captured-not-oldest",
         # pet
         # "topic-pet-cat-followup",
         # "topic-pet-bird-followup",
@@ -178,6 +181,25 @@ if __name__ == "__main__":
         # "topic-lemurs-pet-collected-home-country-collected",
         # "topic-lemurs-pet-collected-home-country-not-collected",
         # "topic-lemurs-user-would-mind-no",
+        # birthday
+        # "topic-birthday-age-collected",
+        # "topic-birthday-age-not-collected",
+        # "topic-birthday-handle-one",
+        # "topic-birthday-celebrating",
+        # "topic-birthday-handle-two",
+        # "topic-birthday-sibling-not-collected",
+        # "topic-birthday-handle-two-wanted",
+        # "topic-birthday-giving-gifts",
+        # "topic-birthday-sibling-collected",
+        # "topic-birthday-gifts",
+        # "topic-birthday-gifts-handle-four",
+        # "topic-birthday-perfect-gift",
+        # # food
+        # "topic-day-three-haru-more-food",
+        # "topic-day-three-haru-meal-time",
+        # "topic-day-three-favorite-food-nooldes-china-explain",
+        # "topic-day-three-favorite-food-pizza-italy-explain",
+        # "topic-day-three-favorite-food-burgers-america-explain",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
