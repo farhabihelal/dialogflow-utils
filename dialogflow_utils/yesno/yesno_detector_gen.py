@@ -39,6 +39,9 @@ class YesNoDetectorGenerator:
             raise ValueError(
                 f"multiple fallback found for intent `{parent.display_name}`!".capitalize()
             )
+        # check sent paths are already available in fallback
+        if not self.has_unsafe_sentiments(fallback_intent):
+            create_sentiments = True
 
         # yes node
         yes_intent: Intent = self.api.intents["display_name"].get(
@@ -120,6 +123,11 @@ class YesNoDetectorGenerator:
                 "api": self.api,
                 "intent_names": [fallback_intent.display_name],
                 "language_code": language_code,
+                "sent_map": {
+                    "positive": yes_intent.display_name,
+                    "neutral": yes_intent.display_name,
+                    "negative": no_intent.display_name,
+                },
             }
             sent_gen = SentimentGeneratorUnsafe(sent_config)
             sent_gen.run()
@@ -162,6 +170,29 @@ class YesNoDetectorGenerator:
             if i + 1 < len(parent_names):
                 sleep(10)
 
+    def has_unsafe_sentiments(self, intent: Intent) -> bool:
+        """Checks whether an intent has unsafe sentiment paths.
+        The logic is very simple. It checks whether a dummy intent is present with 3 children.
+
+        Args:
+            intent (Intent)
+
+        Returns:
+            bool
+        """
+        if len(intent.children) == 0:
+            return False
+        elif (
+            len(intent.children) == 1 and "dummy" not in intent.children[0].display_name
+        ):
+            return False
+        else:
+            for x in intent.children:
+                x: Intent
+                if "dummy" in x.display_name:
+                    return True if len(x.children) == 3 else False
+        return False
+
 
 if __name__ == "__main__":
     intent_names = [
@@ -201,8 +232,16 @@ if __name__ == "__main__":
         # "topic-day-three-favorite-food-pizza-italy-explain",
         # "topic-day-three-favorite-food-burgers-america-explain",
         # sports
-        "topic-sports",
-        "coach-question",
+        # "topic-sports",
+        # "coach-question",
+        # hobbies
+        # "topic-day-three-hobbies",
+        # "topic-day-three-hobbies-gaming",
+        # "topic-day-three-hobbies-no-video-games",
+        # "topic-day-three-hobbies-chess-fact",
+        # "topic-day-three-hobbies-chess-fact-say",
+        # "topic-day-three-hobbies-video-game-fact",
+        # "topic-day-three-hobbies-wrappingup",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
