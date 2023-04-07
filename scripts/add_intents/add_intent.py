@@ -14,8 +14,8 @@ from time import sleep
 import json
 
 
-def get_intent_data(intent_def: dict) -> tuple:
-    parent = df.intents["display_name"].get(intent_def["parent_name"])
+def get_intent_data(api: Dialogflow, intent_def: dict) -> tuple:
+    parent = api.intents["display_name"].get(intent_def["parent_name"])
 
     intent_obj = dialogflow_v2.Intent()
     intent_obj.display_name = intent_def["display_name"]
