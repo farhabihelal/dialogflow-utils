@@ -19,17 +19,17 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
     def get_action(self, parent: Intent):
         action = ""
 
-        if parent.intent_obj.action:
-            action = parent.intent_obj.action
+        if parent.action:
+            action = parent.action
 
         elif len(parent.children) == 1:
-            action = parent.children[0].intent_obj.action
+            action = parent.children[0].action
 
         elif len(parent.children) > 1:
             for x in parent.children:
                 x: Intent
                 if x.intent_obj.is_fallback:
-                    action = x.intent_obj.action
+                    action = x.action
 
         return action
 
@@ -45,7 +45,7 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
 
         dummy_intent = Intent(dummy_intent_obj)
 
-        parent.intent_obj.action = dummy_intent_obj.display_name
+        parent.action = dummy_intent_obj.display_name
         dummy_intent = self.api.create_child(
             intent=dummy_intent, parent=parent, language_code=language_code
         )
@@ -70,18 +70,18 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             parent.custom_payload = payload
 
             dummy_intent: Intent = self.create_dummy(parent)
-            sentiment_intents: dict = self.get_sentiment_intents(dummy_intent)
-            self.add_metadata(dummy_intent, sentiment_intents)
-            self.apply_sent_map(sentiment_intents)
+            sentiment_intents_data: dict = self.get_sentiment_intents(dummy_intent)
+            self.add_metadata(dummy_intent, sentiment_intents_data)
+            self.apply_sent_map(sentiment_intents_data)
 
             # update parent metadata
-            parent._intent_obj.action = dummy_intent.display_name
+            parent.action = dummy_intent.display_name
             parent._intent_obj = self.api.update_intent(
                 intent=parent.intent_obj, language_code=language_code
             )
 
             self.api.create_children(
-                intents=list(sentiment_intents.values()),
+                intents=list(sentiment_intents_data.values()),
                 parent=dummy_intent,
                 language_code=language_code,
             )
@@ -91,18 +91,22 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             if i + 1 < len(parent_names):
                 sleep(10)
 
-    def apply_sent_map(self, intents):
+    def apply_sent_map(self, sentiment_intents_data):
         if not self.config.get("sent_map"):
             return
 
-        for intent in intents:
-            intent: Intent
-            if "positive" in intent.display_name:
-                intent._intent_obj.action = f"{self.config['sent_map']['positive']}"
-            elif "neutral" in intent.display_name:
-                intent._intent_obj.action = f"{self.config['sent_map']['neutral']}"
-            elif "negative" in intent.display_name:
-                intent._intent_obj.action = f"{self.config['sent_map']['negative']}"
+        if hasattr(sentiment_intents_data, "positive"):
+            sentiment_intents_data[
+                "positive"
+            ].action = f"{self.config['sent_map']['positive']}"
+        if hasattr(sentiment_intents_data, "neutral"):
+            sentiment_intents_data[
+                "neutral"
+            ].action = f"{self.config['sent_map']['neutral']}"
+        if hasattr(sentiment_intents_data, "negative"):
+            sentiment_intents_data[
+                "negative"
+            ].action = f"{self.config['sent_map']['negative']}"
 
 
 if __name__ == "__main__":
@@ -165,6 +169,10 @@ if __name__ == "__main__":
         # "tennis-fact-yes-fallback",
         # "likes-to-play-sports-fallback",
         # "likes-to-watch-sports-or-fallback-fallback",
+        # "coach-reaction-fallback",
+        # "more-sports-facts-question-fallback",
+        # "play-or-watch-sports-question-fallback",
+        # "play-professionally-fallback",
         # hobbies
         # "topic-day-three-hobbies-fallback",
         # "topic-day-three-hobbies-fun-fallback",
