@@ -40,7 +40,7 @@ class YesNoDetectorGenerator:
                 f"multiple fallback found for intent `{parent.display_name}`!".capitalize()
             )
         # check sent paths are already available in fallback
-        if not self.has_unsafe_sentiments(fallback_intent):
+        if fallback_intent and not self.has_unsafe_sentiments(fallback_intent):
             create_sentiments = True
 
         # yes node
@@ -102,11 +102,11 @@ class YesNoDetectorGenerator:
                         "node_type": "FallbackNode",
                     }
                 ),
-                dialogflow_v2.Intent.Message(
-                    text=dialogflow_v2.Intent.Message.Text(
-                        text=["this is a fallback response.".title()]
-                    )
-                ),
+                # dialogflow_v2.Intent.Message(
+                #     text=dialogflow_v2.Intent.Message.Text(
+                #         text=["this is a fallback response.".title()]
+                #     )
+                # ),
             ]
             fallback_intent = Intent(fallback_intent_obj)
 
@@ -234,6 +234,8 @@ if __name__ == "__main__":
         # sports
         # "topic-sports",
         # "coach-question",
+        # "play-professionally",
+        # "play-for-fun",
         # hobbies
         # "topic-day-three-hobbies",
         # "topic-day-three-hobbies-gaming",
