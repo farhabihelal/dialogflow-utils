@@ -69,14 +69,15 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             payload.update({"sentiment_classification_override": {}})
             parent.custom_payload = payload
 
-            # update parent
-            # parent._intent_obj = self.api.update_intent(
-            #     intent=parent, language_code=language_code
-            # )
-
             dummy_intent: Intent = self.create_dummy(parent)
             sentiment_intents: dict = self.get_sentiment_intents(dummy_intent)
             self.add_metadata(dummy_intent, sentiment_intents)
+
+            # update parent metadata
+            parent._intent_obj.action = dummy_intent.display_name
+            parent._intent_obj = self.api.update_intent(
+                intent=parent.intent_obj, language_code=language_code
+            )
 
             self.api.create_children(
                 intents=list(sentiment_intents.values()),
@@ -91,7 +92,6 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
 
 
 if __name__ == "__main__":
-
     intent_names = [
         # intro
         # "topic-intro-engage-smalltalk-must-fallback",
@@ -126,9 +126,9 @@ if __name__ == "__main__":
         # "topic-hometown-looking-for-a-new-roommate-fallback",
         # "topic-hometown-new-roommate-yes-reaction",
         # "topic-hometown-looking-for-a-new-roommate-no-reaction",
-        "topic-hometown-not-from-homecountry-capture-birthcountry",
-        "topic-hometown-homecountry-live-now-fallback",
-        "topic-hometown-what-question-fallback",
+        # "topic-hometown-not-from-homecountry-capture-birthcountry",
+        # "topic-hometown-homecountry-live-now-fallback",
+        # "topic-hometown-what-question-fallback",
         # travel homecountry
         # "topic-travel-homecountry-human-guesses-harus-from-non-japan-country",
         # "topic-travel-homecountry-human-from-other-country",
@@ -138,6 +138,9 @@ if __name__ == "__main__":
         # "topic-travel-homecountry-human-seen-the-northern-lights-fallback",
         # "topic-travel-homecountry-wants-to-know-where-the-lights-come-from",
         # "topic-travel-homecountry-loves-how-humans-interact-with-nature",
+        # family
+        # "topic-day-two-family-siblings-not-captured-not-oldest-fallback",
+        # "topic-day-two-family-siblings-oldest-fallback",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -145,7 +148,8 @@ if __name__ == "__main__":
 
     config = {
         "api": None,
-        "credential": os.path.join(keys_dir, "es.json"),
+        # "credential": os.path.join(keys_dir, "es.json"),
+        "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
