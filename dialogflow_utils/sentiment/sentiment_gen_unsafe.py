@@ -72,6 +72,7 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             dummy_intent: Intent = self.create_dummy(parent)
             sentiment_intents: dict = self.get_sentiment_intents(dummy_intent)
             self.add_metadata(dummy_intent, sentiment_intents)
+            self.apply_sent_map(sentiment_intents)
 
             # update parent metadata
             parent._intent_obj.action = dummy_intent.display_name
@@ -89,6 +90,19 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
 
             if i + 1 < len(parent_names):
                 sleep(10)
+
+    def apply_sent_map(self, intents):
+        if not self.config.get("sent_map"):
+            return
+
+        for intent in intents:
+            intent: Intent
+            if "positive" in intent.display_name:
+                intent._intent_obj.action = f"{self.config['sent_map']['positive']}"
+            elif "neutral" in intent.display_name:
+                intent._intent_obj.action = f"{self.config['sent_map']['neutral']}"
+            elif "negative" in intent.display_name:
+                intent._intent_obj.action = f"{self.config['sent_map']['negative']}"
 
 
 if __name__ == "__main__":
@@ -141,6 +155,27 @@ if __name__ == "__main__":
         # family
         # "topic-day-two-family-siblings-not-captured-not-oldest-fallback",
         # "topic-day-two-family-siblings-oldest-fallback",
+        # sports
+        # "like-sports-fallback",
+        # "basketball-fact-question-fallback",
+        # "baseball-fact-question-fallback",
+        # "tennis-fact-question-fallback",
+        # "basketball-fact-yes-fallback",
+        # "baseball-fact-yes-fallback",
+        # "tennis-fact-yes-fallback",
+        # "likes-to-play-sports-fallback",
+        # "likes-to-watch-sports-or-fallback-fallback",
+        # hobbies
+        # "topic-day-three-hobbies-fallback",
+        # "topic-day-three-hobbies-fun-fallback",
+        # "topic-day-three-hobbies-video-games-fallback",
+        # "topic-day-three-hobbies-no-video-games-fallback",
+        # "topic-day-three-hobbies-suggest-video-game-fact-fallback",
+        # "topic-day-three-hobbies-video-game-fact-fallback",
+        # "topic-day-three-hobbies-haru-fallback",
+        # "topic-day-three-hobbies-riddle-fallback",
+        # "topic-day-three-hobbies-chess-fact-fallback",
+        # "topic-day-three-hobbies-wrappingup-fallback",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
