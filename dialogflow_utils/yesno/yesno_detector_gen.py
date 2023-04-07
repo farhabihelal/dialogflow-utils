@@ -96,7 +96,7 @@ class YesNoDetectorGenerator:
                 dialogflow_v2.Intent.Message(
                     payload={
                         "local_classifier_class": "Fallback",
-                        "node_type": "AnswerNode",
+                        "node_type": "FallbackNode",
                     }
                 ),
                 dialogflow_v2.Intent.Message(
@@ -166,7 +166,7 @@ class YesNoDetectorGenerator:
 if __name__ == "__main__":
     intent_names = [
         # family
-        "topic-day-two-family-siblings-not-captured-not-oldest",
+        # "topic-day-two-family-siblings-not-captured-not-oldest",
         # pet
         # "topic-pet-cat-followup",
         # "topic-pet-bird-followup",
@@ -200,6 +200,9 @@ if __name__ == "__main__":
         # "topic-day-three-favorite-food-nooldes-china-explain",
         # "topic-day-three-favorite-food-pizza-italy-explain",
         # "topic-day-three-favorite-food-burgers-america-explain",
+        # sports
+        "topic-sports",
+        "coach-question",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
