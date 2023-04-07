@@ -25,7 +25,7 @@ class SentimentGenerator:
     def configure(self, config: dict):
         self.config = config
 
-    def add_metadata(self, parent: Intent, sentiment_intents: dict):
+    def add_metadata(self, parent: Intent, sentiment_intents: dict) -> Intent:
         payload = parent.custom_payload
         metadata = {
             "sentiment_classification_override": {
@@ -39,9 +39,10 @@ class SentimentGenerator:
         payload.update(metadata)
         parent.custom_payload = payload
 
-        self.api.update_intent(
-            intent=parent.intent_obj, language_code=self.config["language_code"]
-        )
+        # self.api.update_intent(
+        #     intent=parent.intent_obj, language_code=self.config["language_code"]
+        # )
+        return parent
 
     def get_sentiment_intents(self, parent: Intent) -> dict:
         return {x: self.get_sentiment_intent(x, parent) for x in self.valid_sentiments}
@@ -57,7 +58,7 @@ class SentimentGenerator:
         intent_obj.events = [intent_obj.display_name]
         intent_obj.action = self.get_action(parent)
         intent_obj.messages.append(
-            dialogflow_v2.Intent.Message(payload={"node_type": "RepeatNode"})
+            dialogflow_v2.Intent.Message(payload={"node_type": "AnswerNode"})
         )
         intent_obj.messages.append(
             dialogflow_v2.Intent.Message(
@@ -93,7 +94,7 @@ class SentimentGenerator:
 
         parent_names = intent_names if intent_names else self.config["intent_names"]
 
-        for parent_name in parent_names:
+        for i, parent_name in enumerate(parent_names):
             parent_name: str
             parent: Intent = self.api.intents["display_name"].get(parent_name)
             if not parent:
@@ -114,19 +115,32 @@ class SentimentGenerator:
             self.api.update_intent(
                 intent=parent.intent_obj, language_code=language_code
             )
-            sleep(2)
+
+            print(f"{parent_name}: success")
+
+            if i + 1 < len(parent_names):
+                sleep(10)
 
 
 if __name__ == "__main__":
-
-    intent_names = []
+    intent_names = [
+        # "watches-on-tv",
+        # "topic-sports-tv-speaker-question",
+        # "watch-in-person",
+        # hobbies
+        # "topic-day-three-hobbies-fun-handle",
+        # "topic-day-three-hobbies-collected",
+        # "topic-day-three-hobbies-video-games",
+        "topic-day-three-hobbies-no-video-games",
+    ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
         "api": None,
-        "credential": os.path.join(keys_dir, "es.json"),
+        # "credential": os.path.join(keys_dir, "es.json"),
+        "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
