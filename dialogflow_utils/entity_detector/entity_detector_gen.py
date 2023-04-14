@@ -26,7 +26,6 @@ class EntityDetectorGenerator:
         self.config = config
 
     def create_entity_detector(self, parent: Intent, language_code: str = None):
-
         # fallback node
         fallback_nodes = [x for x in parent.children if x.intent_obj.is_fallback]
         fallback_intent: Intent = None
@@ -135,12 +134,13 @@ class EntityDetectorGenerator:
 
 
 if __name__ == "__main__":
-
     intent_names = [
         # pet
-        "topic-pet-multiple-age",
-        "topic-pet-how-old-question",
+        # "topic-pet-multiple-age",
+        # "topic-pet-how-old-question",
         # lemurs
+        # friends
+        "topic-day-four-friends-name"
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -148,7 +148,8 @@ if __name__ == "__main__":
 
     config = {
         # "credential": os.path.join(keys_dir, "es.json"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }

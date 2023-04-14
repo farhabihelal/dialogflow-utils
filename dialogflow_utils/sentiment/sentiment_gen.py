@@ -124,14 +124,15 @@ class SentimentGenerator:
 
 if __name__ == "__main__":
     intent_names = [
-        # "watches-on-tv",
-        # "topic-sports-tv-speaker-question",
-        # "watch-in-person",
-        # hobbies
-        # "topic-day-three-hobbies-fun-handle",
-        # "topic-day-three-hobbies-collected",
-        # "topic-day-three-hobbies-video-games",
-        "topic-day-three-hobbies-no-video-games",
+        # "topic-day-three-food-summingup",
+        # "topic-day-three-haru-food-merge"
+        # friends
+        # "topic-day-four-friend-like",
+        # "topic-day-four-haru-is-friend-do",
+        # "topic-day-four-good-friend",
+        # "topic-day-four-friends-joke",
+        # "topic-day-four-friends-joke-explain",
+        # "topic-day-four-friends-user-tells-joke",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -140,7 +141,8 @@ if __name__ == "__main__":
     config = {
         "api": None,
         # "credential": os.path.join(keys_dir, "es.json"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }

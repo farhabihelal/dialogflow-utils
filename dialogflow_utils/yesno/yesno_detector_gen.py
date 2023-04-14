@@ -204,6 +204,20 @@ if __name__ == "__main__":
         # "topic-pet-hypothetical-pet-refresh-harder-cat",
         # "topic-pet-hypothetical-pet-refresh-harder-dog",
         # lemurs
+        # "topic-lemurs",
+        # "topic-lemurs-pet-collected-home-country-not-collected-not-native-pet-store",
+        # "topic-lemurs-pet-home-country-collected-pet-store",
+        # "topic-lemurs-fav-animal-collected-home-country-collected",
+        # "topic-lemurs-fav-animal-collected-home-country-not-collected",
+        # "topic-lemurs-fav-animal-not-native",
+        # "topic-lemurs-no-animal-not-native",
+        # "topic-lemurs-no-animal-home-country-collected",
+        # "topic-lemurs-no-animal-home-country-not-collected",
+        # "topic-lemurs-last-fact",
+        # "topic-lemurs-last-fact-handle",
+        # "topic-lemurs-no-animal-petname-collected",
+        # "topic-lemurs-fav-animal-native-petname-collected",
+        # "topic-lemurs-user-would-mind",
         # "topic-lemurs-destination-merge",
         # "topic-lemurs-are-from",
         # "topic-lemurs-pet-collected",
@@ -231,6 +245,7 @@ if __name__ == "__main__":
         # "topic-day-three-favorite-food-nooldes-china-explain",
         # "topic-day-three-favorite-food-pizza-italy-explain",
         # "topic-day-three-favorite-food-burgers-america-explain",
+        # "topic-day-three-favorite-food-collected",
         # sports
         # "topic-sports",
         # "coach-question",
@@ -244,6 +259,12 @@ if __name__ == "__main__":
         # "topic-day-three-hobbies-chess-fact-say",
         # "topic-day-three-hobbies-video-game-fact",
         # "topic-day-three-hobbies-wrappingup",
+        # friends
+        # "topic-day-four-friends",
+        # "topic-day-four-friends-make-laugh",
+        # "topic-day-four-friends-user-joke",
+        # "topic-day-four-haru-is-friend",
+        # "topic-day-four-friends-joke-explain",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -251,7 +272,8 @@ if __name__ == "__main__":
 
     config = {
         # "credential": os.path.join(keys_dir, "es.json"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }

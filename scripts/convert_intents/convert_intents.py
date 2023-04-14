@@ -1,5 +1,4 @@
 if __name__ == "__main__":
-
     import os
     import sys
 
@@ -16,28 +15,14 @@ if __name__ == "__main__":
 
     from time import sleep
 
-    intent_names = [
-        # "basketball-fact-yes",
-        # "baseball-fact-yes",
-        # "tennis-fact-yes",
-        # "knows-basketball-fact-no",
-        # "knew-baseball-fact-no",
-        # "knew-tennis-fact-no",
-        "like-sports",
-        # "other-sports",
-        # "likes-to-watch-sports-or-fallback",
-        # "watch-in-person",
-        # "watches-on-tv - fallback",
-        # "play-for-fun-fallback",
-        # "coach-reaction",
-    ]
+    intent_names = ["topic-day-three-haru-meal-time-fallback"]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../../")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
-        "credential": os.path.join(keys_dir, "es.json"),
-        # "credential": os.path.join(keys_dir, "haru-test.json"),
+        # "credential": os.path.join(keys_dir, "es.json"),
+        "credential": os.path.join(keys_dir, "haru-test.json"),
     }
     df = Dialogflow(config)
     df.get_intents()
@@ -51,9 +36,9 @@ if __name__ == "__main__":
             continue
 
         payload = intent.custom_payload
-        payload["node_type"] = "QuestionNode"
+        payload["node_type"] = "FallbackNode"
         intent.custom_payload = payload
-        df.convert_intent_type(intent=intent, language_code="en", make_fallback=False)
+        df.convert_intent_type(intent=intent, language_code="en", make_fallback=True)
 
         print(f"Success: {intent_name}")
         if i + 1 < len(intent_names):

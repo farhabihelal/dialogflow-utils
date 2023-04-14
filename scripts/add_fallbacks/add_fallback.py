@@ -37,15 +37,16 @@ def get_intent_data(parent_name: str) -> tuple:
 
 if __name__ == "__main__":
     parent_names = [
-        "like-sports",
-        "basketball-fact-question",
-        "baseball-fact-question",
-        "tennis-fact-question",
-        "basketball-fact-yes",
-        "baseball-fact-yes",
-        "tennis-fact-yes",
-        "likes-to-play-sports",
-        "likes-to-watch-sports-or-fallback",
+        # "like-sports",
+        # "basketball-fact-question",
+        # "baseball-fact-question",
+        # "tennis-fact-question",
+        # "basketball-fact-yes",
+        # "baseball-fact-yes",
+        # "tennis-fact-yes",
+        # "likes-to-play-sports",
+        # "likes-to-watch-sports-or-fallback",
+        "play-or-watch-sports-question",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../../")

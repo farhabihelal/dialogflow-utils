@@ -18,7 +18,8 @@ if __name__ == "__main__":
     intent_names = [
         # "topic-pet-favorite-fallback-dummy",
         # "topic-pet-hypothetical-pet-refresh-fallback",
-        "topic-lemurs-pet-collected-home-country-not-collected-not-native-dummy",
+        # "topic-lemurs-pet-collected-home-country-not-collected-not-native-dummy",
+        "topic-day-three-haru-food-guess-fallback-dummy"
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../../")
