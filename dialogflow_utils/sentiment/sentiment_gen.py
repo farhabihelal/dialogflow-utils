@@ -39,9 +39,9 @@ class SentimentGenerator:
         payload.update(metadata)
         parent.custom_payload = payload
 
-        # self.api.update_intent(
-        #     intent=parent.intent_obj, language_code=self.config["language_code"]
-        # )
+        self.api.update_intent(
+            intent=parent.intent_obj, language_code=self.config["language_code"]
+        )
         return parent
 
     def get_sentiment_intents(self, parent: Intent) -> dict:
@@ -133,6 +133,26 @@ if __name__ == "__main__":
         # "topic-day-four-friends-joke",
         # "topic-day-four-friends-joke-explain",
         # "topic-day-four-friends-user-tells-joke",
+        # schools
+        # "topic-day-four-school-user-fact"
+        # music
+        # "topic-music-genre-jazz-hum",
+        # "topic-music-eyes-round",
+        # "topic-music-chatbot-stand",
+        # "topic-music-fav-dance-movie",
+        # language
+        # "topic-language-user-doesnot-want-to-learn-second-language",
+        # "topic-language-call-for-user-only-speaks-english-fallback",
+        # "topic-language-learn-english-at-school",
+        # clothing
+        # "topic-day-five-clothing-wearing-wool",
+        # "topic-day-five-clothing-wearing-linen",
+        # weather
+        # "topic-day-five-weather-extreme-temperature",
+        # travel
+        # "topic-day-five-travel-enjoy-not",
+        # "topic-day-five-travel-next-destination-collected",
+        # "topic-day-five-travel-harus-favorite",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -148,4 +168,11 @@ if __name__ == "__main__":
     }
 
     gen = SentimentGenerator(config)
+
+    day, session, topic = 5, 2, "travel"
+    print("backing up... ", end="")
+    gen.api.create_version(
+        f"backup before adding safe sent paths to day {day} session {session} {topic} topic".title()
+    )
+    print("done")
     gen.run()
