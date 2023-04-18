@@ -140,7 +140,16 @@ if __name__ == "__main__":
         # "topic-pet-how-old-question",
         # lemurs
         # friends
-        "topic-day-four-friends-name"
+        # "topic-day-four-friends-name"
+        # travel
+        # "topic-day-five-travel-last-place",
+        # "topic-day-five-travel-favorite-food-not-collected",
+        # "topic-day-five-favorite-continent-south-america",
+        # "topic-day-five-favorite-continent-africa",
+        # "topic-day-five-favorite-continent-asia",
+        # olympics
+        # "topic-olympics-handler-three",
+        # "topic-olympics-would-compete-well-in-favorite-sport",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -155,4 +164,10 @@ if __name__ == "__main__":
     }
 
     gen = EntityDetectorGenerator(config)
+    day, session, topic = 5, 2, "olympics"
+    print("backing up... ", end="")
+    gen.api.create_version(
+        f"backup before adding entity detections to day {day} session {session} {topic} topic".title()
+    )
+    print("done")
     gen.run()

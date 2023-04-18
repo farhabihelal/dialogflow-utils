@@ -111,6 +111,7 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
 
 if __name__ == "__main__":
     intent_names = [
+        # food
         # "topic-day-three-food-fallback",
         # "topic-day-three-haru-food-know-fallback",
         # "topic-day-three-haru-food-donot-know-fallback",
@@ -129,6 +130,46 @@ if __name__ == "__main__":
         # "topic-day-four-friend-visited-fallback",
         # "topic-day-four-friends-make-laugh-fallback",
         # "topic-day-four-friends-user-joke-fallback",
+        # schools
+        # "topic-day-four-school-favorite-subject-fallback",
+        # "topic-day-four-school-favorite-subject-handle-fallback",
+        # "topic-day-four-school-extra-curriculars-fallback",
+        # "topic-day-four-school-desired-carrier-fallback",
+        # music
+        # "topic-music-genre-fallback",
+        # "topic-music-fallback",
+        # "topic-music-genre-instrument-fallback",
+        # "topic-music-select-instrument-fallback",
+        # "topic-music-genre-rhymes-fallback",
+        # "topic-music-genre-rhymes-explain-fallback",
+        # "topic-music-dancing-fallback",
+        # "topic-music-fav-dance-movie-catch",
+        # "topic-music-chatbot-fallback",
+        # "topic-music-chatbot-buy-music-fallback",
+        # "topic-music-hear-fact-fallback",
+        # "topic-music-music-cd-fallback",
+        # "topic-music-music-cd-spins-fallback",
+        # language
+        # "topic-language-fallback",
+        # "topic-language-user-only-speaks-english-fallback",
+        # "topic-language-user-speak-something-else",
+        # "topic-language-user-speak-spanish-fallback",
+        # "topic-language-user-speak-something-else-fallback",
+        # "topic-language-check-favorite-animal-collected-yes-yes-fallback",
+        # "topic-language-check-favorite-animal-collected-no-fallback",
+        # "topic-language-user-speak-japanese-fallback",
+        # "topic-language-reset-in-language-fallback",
+        # "topic-language-second-reset-in-language-fallback",
+        # clothing
+        # "topic-day-five-clothing-user-wear-fallback",
+        # "topic-day-five-clothing-favorite-season-fall-winter",
+        # weather
+        # "topic-day-five-weather-sun-rain-fallback",
+        # "topic-day-five-weather-favorite-season-fallback",
+        # travel
+        # "topic-day-five-travel-next-fallback",
+        # "topic-day-five-travel-food-sightseeing-fallback",
+        # "topic-day-five-travel-favorite-continent-fallback",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -137,10 +178,18 @@ if __name__ == "__main__":
     config = {
         "api": None,
         # "credential": os.path.join(keys_dir, "es.json"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
 
     gen = SentimentGeneratorUnsafe(config)
+
+    day, session, topic = 5, 2, "travel"
+    print("backing up... ", end="")
+    gen.api.create_version(
+        f"backup before adding unsafe sent paths to day={day} session={session} topic={topic}".title()
+    )
+    print("done")
     gen.run()

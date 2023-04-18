@@ -265,6 +265,76 @@ if __name__ == "__main__":
         # "topic-day-four-friends-user-joke",
         # "topic-day-four-haru-is-friend",
         # "topic-day-four-friends-joke-explain",
+        # school
+        # "topic-day-four-school",
+        # "topic-day-four-school-haru-fact",
+        # "topic-day-four-school-haru-tells-fact",
+        # "topic-day-four-school-promise",
+        # "topic-day-four-school-carrier",
+        # "topic-day-four-school-any-carrier",
+        # music
+        # "topic-music-select-instrument-guitar-wonderwalls",
+        # "topic-music-genre-sporange-definition",
+        # "topic-music-genre-rhymes-explain-must",
+        # "topic-music-hear-fact-say",
+        # "topic-music-music-cd-fascinating",
+        # "topic-music-music-cd-spins-fast",
+        # "topic-music-chatbot-lessons",
+        # "topic-music-chatbot",
+        # "topic-music-hear-fact",
+        # "topic-music-music-start-band",
+        # language
+        # "topic-language-user-speak-spanish",
+        # "topic-language-user-speak-japanese",
+        # "topic-language-carrier-is-collected-no",
+        # "topic-language-carrier-is-collected-yes",
+        # "topic-language-learn-english-at-home",
+        # "topic-language-user-only-speaks-english",
+        # "topic-language-check-favorite-animal-collected-yes",
+        # clothing
+        # "topic-day-five-clothing-impressed",
+        # "topic-day-five-clothing-sunglasses-fact",
+        # "topic-day-five-clothing-leading-question",
+        # "topic-day-five-clothing-summer-fashion",
+        # "topic-day-five-clothing-winter-fashion",
+        # "topic-day-five-clothing-hot-weather",
+        # "topic-day-five-clothing-cold-weather",
+        # "topic-day-five-clothing",
+        # "topic-day-five-clothing-tshirt-fact",
+        # "topic-day-five-clothing-sunglasses",
+        # "topic-day-five-clothing-linen-fact",
+        # "topic-day-five-clothing-wool-fact",
+        # weather
+        # "topic-day-five-weather",
+        # "topic-day-five-weather-rain",
+        # "topic-day-five-weather-sun",
+        # travel
+        # "topic-day-five-travel",
+        # "topic-day-five-travel-liketo",
+        # "topic-day-five-travel-enjoy",
+        # "topic-day-five-travel-next-haru-come",
+        # "topic-day-five-favorite-continent-antarctica-handle",
+        # "topic-day-five-favorite-continent-africa",
+        # "topic-day-five-favorite-continent-south-america",
+        # "topic-day-five-travel-next-destination-not-collected",
+        # "topic-day-five-travel-favorite-food-collected",
+        # "topic-day-five-travel-sing",
+        # "topic-day-five-travel-pre-conclusion",
+        # olympics
+        # "topic-olympics",
+        # "topic-olympics-handler-one",
+        # "topic-olympics-handler-two",
+        # "topic-olympics-select-user-would-compete-tennis",
+        # "topic-olympics-select-user-would-compete-diving",
+        # "topic-olympics-select-user-would-compete-archery",
+        # "topic-olympics-select-user-would-compete-volleyball",
+        # "topic-olympics-handler-four",
+        # "topic-olympics-handler-five",
+        # "topic-olympics-haru-height-above-twentyfour",
+        # "topic-olympics-haru-height-below-twentyfour",
+        # "topic-olympics-home-country-collected-in-favorite-sport",
+        # "topic-olympics-home-country-not-collected",
+        # "topic-olympics-best-event-for-country",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -279,4 +349,11 @@ if __name__ == "__main__":
     }
 
     gen = YesNoDetectorGenerator(config)
+
+    day, session, topic = 5, 2, "olympics"
+    print("backing up... ", end="")
+    gen.api.create_version(
+        f"backup before adding y/n paths to day {day} session {session} topic {topic}".title()
+    )
+    print("done")
     gen.run()
