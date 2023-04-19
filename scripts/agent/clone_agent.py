@@ -50,11 +50,10 @@ if __name__ == "__main__":
     df_dst.create_version(f"Backup before cloning `{src_agent_name}` from api.")
     print("done")
 
-    df_dst.batch_update_intents(
-        intents=df_src.intents["display_name"].values(),
-        language_code=src_config["language_code"],
-    )
-    print("clone : done".title())
+    print("cloning ...", end="")
+    response = df_src.export_agent()
+    df_dst.restore_agent(response)
+    print("done")
 
     print("training agent ...", end="")
     operation = df_dst.train_agent()
