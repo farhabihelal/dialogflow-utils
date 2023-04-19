@@ -21,7 +21,8 @@ if __name__ == "__main__":
     config = {
         "src_credential": os.path.join(keys_dir, "haru-test.json"),
         "dst_credential": os.path.join(keys_dir, "es.json"),
-        "dst_credential": os.path.join(keys_dir, "child-in-hospital.json"),
+        # "dst_credential": os.path.join(keys_dir, "es2.json"),
+        # "dst_credential": os.path.join(keys_dir, "child-in-hospital.json"),
         "language_code": "en",
     }
 
@@ -41,12 +42,21 @@ if __name__ == "__main__":
     src_agent_name = os.path.splitext(os.path.basename(src_config["credential"]))[
         0
     ].title()
-    backup_description = f"Backup before cloning `{src_agent_name}`."
-    df_dst.create_version(backup_description)
-    print("backup : done".title())
+    dst_agent_name = os.path.splitext(os.path.basename(dst_config["credential"]))[
+        0
+    ].title()
+
+    print(f"backing up {dst_agent_name} ...", end="")
+    df_dst.create_version(f"Backup before cloning `{src_agent_name}` from api.")
+    print("done")
 
     df_dst.batch_update_intents(
         intents=df_src.intents["display_name"].values(),
         language_code=src_config["language_code"],
     )
     print("clone : done".title())
+
+    print("training agent ...", end="")
+    operation = df_dst.train_agent()
+    operation.result()
+    print("done")
