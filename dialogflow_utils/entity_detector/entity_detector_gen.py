@@ -159,14 +159,21 @@ if __name__ == "__main__":
         # "topic-olympics-handler-three",
         # "topic-olympics-would-compete-well-in-favorite-sport",
         # food
-        "topic-day-three-food-summingup"
+        "topic-tiny-habits2-scaling-case",
+        "topic-tiny-habits2-scaling-case-yes"
+        # "topic-tiny-habits2-scaling-transform",
+        # "topic-tiny-habits2-anchor-will",
+        # "topic-tiny-habits2-celebration-similar",
+        # "topic-tiny-habits2-celebration-buzzing",
+        # "topic-tiny-habits2-celebration-inspiration-yes"
+        
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
-        "credential": os.path.join(keys_dir, "es.json"),
+        "credential": os.path.join(keys_dir, "tiny-tiny-habits-rvuq.json"),
         # "credential": os.path.join(keys_dir, "es2.json"),
         # "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
