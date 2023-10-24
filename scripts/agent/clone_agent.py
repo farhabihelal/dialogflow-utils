@@ -19,10 +19,14 @@ if __name__ == "__main__":
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
-        "src_credential": os.path.join(keys_dir, "haru-test.json"),
-        "dst_credential": os.path.join(keys_dir, "es.json"),
+        "src_credential": os.path.join(keys_dir, "es.json"),
+        # "src_credential": os.path.join(keys_dir, "es2.json"),
+        # "src_credential": os.path.join(keys_dir, "child-in-hospital.json"),
+        # "src_credential": os.path.join(keys_dir, "haru-test.json"),
+        # "dst_credential": os.path.join(keys_dir, "es.json"),
         # "dst_credential": os.path.join(keys_dir, "es2.json"),
         # "dst_credential": os.path.join(keys_dir, "child-in-hospital.json"),
+        "dst_credential": os.path.join(keys_dir, "haru-test.json"),
         "language_code": "en",
     }
 
@@ -31,7 +35,7 @@ if __name__ == "__main__":
         "language_code": config["language_code"],
     }
     df_src = Dialogflow(src_config)
-    df_src.get_intents(language_code=config["language_code"])
+    # df_src.get_intents(language_code=config["language_code"])
 
     dst_config = {
         "credential": config["dst_credential"],
@@ -46,16 +50,16 @@ if __name__ == "__main__":
         0
     ].title()
 
-    print(f"backing up {dst_agent_name} ...", end="")
-    df_dst.create_version(f"Backup before cloning `{src_agent_name}` from api.")
+    print(f"Backing up {dst_agent_name}...\t", end="")
+    df_dst.create_version(f"Backup before cloning `{src_agent_name}` from api.".title())
     print("done")
 
-    print("cloning ...", end="")
+    print("Cloning...\t", end="")
     response = df_src.export_agent()
     df_dst.restore_agent(response)
     print("done")
 
-    print("training agent ...", end="")
+    print("Training agent...\t", end="")
     operation = df_dst.train_agent()
     operation.result()
     print("done")

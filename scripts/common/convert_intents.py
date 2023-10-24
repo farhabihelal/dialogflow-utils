@@ -15,18 +15,25 @@ if __name__ == "__main__":
 
     from time import sleep
 
-    intent_names = ["topic-day-three-haru-meal-time-fallback"]
-
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../../")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
         # "credential": os.path.join(keys_dir, "es.json"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "haru-chat-games.json"),
     }
     df = Dialogflow(config)
     df.get_intents()
     df.generate_tree()
+
+    intent_names = [
+        x.display_name
+        for x in df.intents["name"].values()
+        if x.custom_payload.get("node_type")
+        and x.custom_payload["node_type"] == "FallbackNode"
+        and not x.intent_obj.is_fallback
+    ]
 
     for i, intent_name in enumerate(intent_names):
         intent_name: str
