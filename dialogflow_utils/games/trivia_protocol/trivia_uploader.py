@@ -1,12 +1,20 @@
 import sys
 import os
 
-sys.path.append(os.path.abspath(f"{os.path.dirname(__file__)}/.."))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+sys.path.append(
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "dialogflow_api", "src")
+    )
+)
 
 import pandas as pd
 
-from dialogflow_api.src.dialogflow import Dialogflow, Intent
+from dialogflow import Dialogflow, Intent
 from db.xlsx import read_xlsx
+
+import re
+from unidecode import unidecode
 
 import google.cloud.dialogflow_v2 as dialogflow_v2
 
@@ -50,7 +58,9 @@ class TriviaUploader:
         return trivia_data
 
     def process_intent_name(self, text: str) -> str:
-        return text.replace(" ", "-").lower().strip()
+        text = text.replace(" ", "-").lower().strip()
+        text = re.sub(r"[^-\w\d]", "", unidecode(text))
+        return text
 
     def upload(self, trivia_data: dict = None, language_code: str = None):
         trivia_data = trivia_data if trivia_data else self.trivia_data
@@ -115,6 +125,12 @@ class TriviaUploader:
         db_path = db_path if db_path else self.config["db_path"]
 
         trivia_data = self.load(db_path=db_path)
+
+        print("Backing up... ", end="")
+        self.api.create_version(
+            "back up before uploading trivia by country from api".title()
+        )
+        print("Done!")
 
         print("Uploader is running... ", end="")
         self.upload(trivia_data=trivia_data)
