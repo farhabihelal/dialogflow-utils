@@ -95,6 +95,7 @@ class YesNoDetectorGenerator:
             fallback_intent_obj = dialogflow_v2.Intent()
             fallback_intent_obj.display_name = f"{parent.display_name}-fallback"
             fallback_intent_obj.events = [fallback_intent_obj.display_name]
+            fallback_intent_obj.is_fallback = True
             fallback_intent_obj.messages = [
                 dialogflow_v2.Intent.Message(
                     payload={
@@ -195,165 +196,27 @@ class YesNoDetectorGenerator:
 
 
 if __name__ == "__main__":
-    intent_names = [
-        # family
-        # "topic-day-two-family-siblings-not-captured-not-oldest",
-        # pet
-        # "topic-pet-cat-followup",
-        # "topic-pet-bird-followup",
-        # "topic-pet-hypothetical-pet-refresh-harder-cat",
-        # "topic-pet-hypothetical-pet-refresh-harder-dog",
-        # lemurs
-        # "topic-lemurs",
-        # "topic-lemurs-pet-collected-home-country-not-collected-not-native-pet-store",
-        # "topic-lemurs-pet-home-country-collected-pet-store",
-        # "topic-lemurs-fav-animal-collected-home-country-collected",
-        # "topic-lemurs-fav-animal-collected-home-country-not-collected",
-        # "topic-lemurs-fav-animal-not-native",
-        # "topic-lemurs-no-animal-not-native",
-        # "topic-lemurs-no-animal-home-country-collected",
-        # "topic-lemurs-no-animal-home-country-not-collected",
-        # "topic-lemurs-last-fact",
-        # "topic-lemurs-last-fact-handle",
-        # "topic-lemurs-no-animal-petname-collected",
-        # "topic-lemurs-fav-animal-native-petname-collected",
-        # "topic-lemurs-user-would-mind",
-        # "topic-lemurs-destination-merge",
-        # "topic-lemurs-are-from",
-        # "topic-lemurs-pet-collected",
-        # "topic-lemurs-fav-animal-collected",
-        # "topic-lemurs-no-animal-collected",
-        # "topic-lemurs-pet-collected-home-country-collected",
-        # "topic-lemurs-pet-collected-home-country-not-collected",
-        # "topic-lemurs-user-would-mind-no",
-        # birthday
-        # "topic-birthday-age-collected",
-        # "topic-birthday-age-not-collected",
-        # "topic-birthday-handle-one",
-        # "topic-birthday-celebrating",
-        # "topic-birthday-handle-two",
-        # "topic-birthday-sibling-not-collected",
-        # "topic-birthday-handle-two-wanted",
-        # "topic-birthday-giving-gifts",
-        # "topic-birthday-sibling-collected",
-        # "topic-birthday-gifts",
-        # "topic-birthday-gifts-handle-four",
-        # "topic-birthday-perfect-gift",
-        # # food
-        # "topic-day-three-haru-more-food",
-        # "topic-day-three-haru-meal-time",
-        # "topic-day-three-favorite-food-nooldes-china-explain",
-        # "topic-day-three-favorite-food-pizza-italy-explain",
-        # "topic-day-three-favorite-food-burgers-america-explain",
-        # "topic-day-three-favorite-food-collected",
-        # sports
-        # "topic-sports",
-        # "coach-question",
-        # "play-professionally",
-        # "play-for-fun",
-        # hobbies
-        # "topic-day-three-hobbies",
-        # "topic-day-three-hobbies-gaming",
-        # "topic-day-three-hobbies-no-video-games",
-        # "topic-day-three-hobbies-chess-fact",
-        # "topic-day-three-hobbies-chess-fact-say",
-        # "topic-day-three-hobbies-video-game-fact",
-        # "topic-day-three-hobbies-wrappingup",
-        # friends
-        # "topic-day-four-friends",
-        # "topic-day-four-friends-make-laugh",
-        # "topic-day-four-friends-user-joke",
-        # "topic-day-four-haru-is-friend",
-        # "topic-day-four-friends-joke-explain",
-        # school
-        # "topic-day-four-school",
-        # "topic-day-four-school-haru-fact",
-        # "topic-day-four-school-haru-tells-fact",
-        # "topic-day-four-school-promise",
-        # "topic-day-four-school-carrier",
-        # "topic-day-four-school-any-carrier",
-        # music
-        # "topic-music-select-instrument-guitar-wonderwalls",
-        # "topic-music-genre-sporange-definition",
-        # "topic-music-genre-rhymes-explain-must",
-        # "topic-music-hear-fact-say",
-        # "topic-music-music-cd-fascinating",
-        # "topic-music-music-cd-spins-fast",
-        # "topic-music-chatbot-lessons",
-        # "topic-music-chatbot",
-        # "topic-music-hear-fact",
-        # "topic-music-music-start-band",
-        # language
-        # "topic-language-user-speak-spanish",
-        # "topic-language-user-speak-japanese",
-        # "topic-language-carrier-is-collected-no",
-        # "topic-language-carrier-is-collected-yes",
-        # "topic-language-learn-english-at-home",
-        # "topic-language-user-only-speaks-english",
-        # "topic-language-check-favorite-animal-collected-yes",
-        # clothing
-        # "topic-day-five-clothing-impressed",
-        # "topic-day-five-clothing-sunglasses-fact",
-        # "topic-day-five-clothing-leading-question",
-        # "topic-day-five-clothing-summer-fashion",
-        # "topic-day-five-clothing-winter-fashion",
-        # "topic-day-five-clothing-hot-weather",
-        # "topic-day-five-clothing-cold-weather",
-        # "topic-day-five-clothing",
-        # "topic-day-five-clothing-tshirt-fact",
-        # "topic-day-five-clothing-sunglasses",
-        # "topic-day-five-clothing-linen-fact",
-        # "topic-day-five-clothing-wool-fact",
-        # weather
-        # "topic-day-five-weather",
-        # "topic-day-five-weather-rain",
-        # "topic-day-five-weather-sun",
-        # travel
-        # "topic-day-five-travel",
-        # "topic-day-five-travel-liketo",
-        # "topic-day-five-travel-enjoy",
-        # "topic-day-five-travel-next-haru-come",
-        # "topic-day-five-favorite-continent-antarctica-handle",
-        # "topic-day-five-favorite-continent-africa",
-        # "topic-day-five-favorite-continent-south-america",
-        # "topic-day-five-travel-next-destination-not-collected",
-        # "topic-day-five-travel-favorite-food-collected",
-        # "topic-day-five-travel-sing",
-        # "topic-day-five-travel-pre-conclusion",
-        # olympics
-        # "topic-olympics",
-        # "topic-olympics-handler-one",
-        # "topic-olympics-handler-two",
-        # "topic-olympics-select-user-would-compete-tennis",
-        # "topic-olympics-select-user-would-compete-diving",
-        # "topic-olympics-select-user-would-compete-archery",
-        # "topic-olympics-select-user-would-compete-volleyball",
-        # "topic-olympics-handler-four",
-        # "topic-olympics-handler-five",
-        # "topic-olympics-haru-height-above-twentyfour",
-        # "topic-olympics-haru-height-below-twentyfour",
-        # "topic-olympics-home-country-collected-in-favorite-sport",
-        # "topic-olympics-home-country-not-collected",
-        # "topic-olympics-best-event-for-country",
-    ]
+    intent_names = ["prompt-repeat-game"]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
         # "credential": os.path.join(keys_dir, "es.json"),
-        "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "es2.json"),
         # "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "haru-chat-games.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
 
     gen = YesNoDetectorGenerator(config)
 
-    day, session, topic = 5, 2, "olympics"
+    # day, session, topic = 3, 1, "food"
     print("backing up... ", end="")
-    gen.api.create_version(
-        f"backup before adding y/n paths to day {day} session {session} topic {topic}".title()
-    )
+    # gen.api.create_version(
+    #     f"backup before adding y/n paths to day {day} session {session} topic {topic}.".title()
+    # )
+    gen.api.create_version(f"backup before adding y/n paths.".title())
     print("done")
     gen.run()
