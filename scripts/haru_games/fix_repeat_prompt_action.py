@@ -48,6 +48,10 @@ if __name__ == "__main__":
         if needs_fixing(intent):
             intents.append(apply_fix(intent))
 
+    if not intents:
+        print("All good. No intents found to fix!")
+        exit(0)
+
     print("backing up... ", end="")
     df.create_version(
         "backup before fixing nodes with `prompt-repeat-game` action from api.".title()

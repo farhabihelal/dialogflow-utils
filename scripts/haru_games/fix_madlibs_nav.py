@@ -68,6 +68,10 @@ if __name__ == "__main__":
             intent = fix(intent)
             intents_to_fix.append(intent)
 
+    if not intents_to_fix:
+        print("All good. No intents found to fix!")
+        exit(0)
+
     print("backing up... ", end="")
     df.create_version(
         "backup before fixing node types in generated madlibs from api.".title()
