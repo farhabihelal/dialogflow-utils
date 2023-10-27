@@ -20,12 +20,15 @@ import re
 
 
 GLOBAL_TOPICS = []
+EXCLUDED_TOPICS = ["topic-intro", "topic-intro-short", "topic-introduction-end"]
 
 
 def is_global_topic(intent: Intent) -> bool:
     return (
-        intent.parent is None and intent.intent_obj.display_name.startswith("topic-")
-    ) or any(x in intent.intent_obj.display_name for x in GLOBAL_TOPICS)
+        (intent.parent is None and intent.intent_obj.display_name.startswith("topic-"))
+        or any(x in intent.intent_obj.display_name for x in GLOBAL_TOPICS)
+        and not any(x in intent.intent_obj.display_name for x in EXCLUDED_TOPICS)
+    )
 
 
 def add_input_context(intent: Intent):
