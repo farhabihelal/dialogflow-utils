@@ -26,7 +26,7 @@ class YesNoDetectorGenerator:
         self.config = config
 
     def create_yesno_detector(self, parent: Intent, language_code: str = None):
-
+        create_sentiments = False
         # fallback node
         fallback_nodes = [x for x in parent.children if x.intent_obj.is_fallback]
         fallback_intent: Intent = None
@@ -39,6 +39,9 @@ class YesNoDetectorGenerator:
             raise ValueError(
                 f"multiple fallback found for intent `{parent.display_name}`!".capitalize()
             )
+        # check sent paths are already available in fallback
+        if fallback_intent and not self.has_unsafe_sentiments(fallback_intent):
+            create_sentiments = True
 
         # yes node
         yes_intent: Intent = self.api.intents["display_name"].get(
@@ -88,21 +91,23 @@ class YesNoDetectorGenerator:
 
         # fallback node
         if not fallback_intent:
+            create_sentiments = True
             fallback_intent_obj = dialogflow_v2.Intent()
             fallback_intent_obj.display_name = f"{parent.display_name}-fallback"
             fallback_intent_obj.events = [fallback_intent_obj.display_name]
+            fallback_intent_obj.is_fallback = True
             fallback_intent_obj.messages = [
                 dialogflow_v2.Intent.Message(
                     payload={
                         "local_classifier_class": "Fallback",
-                        "node_type": "AnswerNode",
+                        "node_type": "FallbackNode",
                     }
                 ),
-                dialogflow_v2.Intent.Message(
-                    text=dialogflow_v2.Intent.Message.Text(
-                        text=["this is a fallback response.".title()]
-                    )
-                ),
+                # dialogflow_v2.Intent.Message(
+                #     text=dialogflow_v2.Intent.Message.Text(
+                #         text=["this is a fallback response.".title()]
+                #     )
+                # ),
             ]
             fallback_intent = Intent(fallback_intent_obj)
 
@@ -114,13 +119,19 @@ class YesNoDetectorGenerator:
 
         sleep(5)
 
-        sent_config = {
-            "api": self.api,
-            "intent_names": [fallback_intent.display_name],
-            "language_code": language_code,
-        }
-        sent_gen = SentimentGeneratorUnsafe(sent_config)
-        sent_gen.run()
+        if create_sentiments:
+            sent_config = {
+                "api": self.api,
+                "intent_names": [fallback_intent.display_name],
+                "language_code": language_code,
+                "sent_map": {
+                    "positive": yes_intent.display_name,
+                    "neutral": yes_intent.display_name,
+                    "negative": no_intent.display_name,
+                },
+            }
+            sent_gen = SentimentGeneratorUnsafe(sent_config)
+            sent_gen.run()
 
     def run(self, intent_names=None, language_code="en"):
         parent_names = intent_names if intent_names else self.config["intent_names"]
@@ -160,35 +171,52 @@ class YesNoDetectorGenerator:
             if i + 1 < len(parent_names):
                 sleep(10)
 
+    def has_unsafe_sentiments(self, intent: Intent) -> bool:
+        """Checks whether an intent has unsafe sentiment paths.
+        The logic is very simple. It checks whether a dummy intent is present with 3 children.
+
+        Args:
+            intent (Intent)
+
+        Returns:
+            bool
+        """
+        if len(intent.children) == 0:
+            return False
+        elif (
+            len(intent.children) == 1 and "dummy" not in intent.children[0].display_name
+        ):
+            return False
+        else:
+            for x in intent.children:
+                x: Intent
+                if "dummy" in x.display_name:
+                    return True if len(x.children) == 3 else False
+        return False
+
 
 if __name__ == "__main__":
-
-    intent_names = [
-        # pet
-        # "topic-pet-cat-followup",
-        # "topic-pet-bird-followup",
-        # "topic-pet-hypothetical-pet-refresh-harder-cat",
-        # "topic-pet-hypothetical-pet-refresh-harder-dog",
-        # lemurs
-        # "topic-lemurs-destination-merge",
-        # "topic-lemurs-are-from",
-        # "topic-lemurs-pet-collected",
-        # "topic-lemurs-fav-animal-collected",
-        # "topic-lemurs-no-animal-collected",
-        # "topic-lemurs-pet-collected-home-country-collected",
-        # "topic-lemurs-pet-collected-home-country-not-collected",
-        # "topic-lemurs-user-would-mind-no",
-    ]
+    intent_names = ["prompt-repeat-game"]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
         # "credential": os.path.join(keys_dir, "es.json"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        # "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "haru-chat-games.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
 
     gen = YesNoDetectorGenerator(config)
+
+    # day, session, topic = 3, 1, "food"
+    print("backing up... ", end="")
+    # gen.api.create_version(
+    #     f"backup before adding y/n paths to day {day} session {session} topic {topic}.".title()
+    # )
+    gen.api.create_version(f"backup before adding y/n paths.".title())
+    print("done")
     gen.run()

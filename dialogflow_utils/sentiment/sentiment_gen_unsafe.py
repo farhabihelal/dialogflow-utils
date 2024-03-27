@@ -19,17 +19,17 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
     def get_action(self, parent: Intent):
         action = ""
 
-        if parent.intent_obj.action:
-            action = parent.intent_obj.action
+        if parent.action:
+            action = parent.action
 
         elif len(parent.children) == 1:
-            action = parent.children[0].intent_obj.action
+            action = parent.children[0].action
 
         elif len(parent.children) > 1:
             for x in parent.children:
                 x: Intent
                 if x.intent_obj.is_fallback:
-                    action = x.intent_obj.action
+                    action = x.action
 
         return action
 
@@ -45,7 +45,7 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
 
         dummy_intent = Intent(dummy_intent_obj)
 
-        parent.intent_obj.action = dummy_intent_obj.display_name
+        parent.action = dummy_intent_obj.display_name
         dummy_intent = self.api.create_child(
             intent=dummy_intent, parent=parent, language_code=language_code
         )
@@ -69,17 +69,19 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             payload.update({"sentiment_classification_override": {}})
             parent.custom_payload = payload
 
-            # update parent
-            # parent._intent_obj = self.api.update_intent(
-            #     intent=parent, language_code=language_code
-            # )
-
             dummy_intent: Intent = self.create_dummy(parent)
-            sentiment_intents: dict = self.get_sentiment_intents(dummy_intent)
-            self.add_metadata(dummy_intent, sentiment_intents)
+            sentiment_intents_data: dict = self.get_sentiment_intents(dummy_intent)
+            self.add_metadata(dummy_intent, sentiment_intents_data)
+            self.apply_sent_map(sentiment_intents_data)
+
+            # update parent metadata
+            parent.action = dummy_intent.display_name
+            parent._intent_obj = self.api.update_intent(
+                intent=parent.intent_obj, language_code=language_code
+            )
 
             self.api.create_children(
-                intents=list(sentiment_intents.values()),
+                intents=list(sentiment_intents_data.values()),
                 parent=dummy_intent,
                 language_code=language_code,
             )
@@ -89,55 +91,85 @@ class SentimentGeneratorUnsafe(SentimentGenerator):
             if i + 1 < len(parent_names):
                 sleep(10)
 
+    def apply_sent_map(self, sentiment_intents_data):
+        if not self.config.get("sent_map"):
+            return
+
+        if hasattr(sentiment_intents_data, "positive"):
+            sentiment_intents_data[
+                "positive"
+            ].action = f"{self.config['sent_map']['positive']}"
+        if hasattr(sentiment_intents_data, "neutral"):
+            sentiment_intents_data[
+                "neutral"
+            ].action = f"{self.config['sent_map']['neutral']}"
+        if hasattr(sentiment_intents_data, "negative"):
+            sentiment_intents_data[
+                "negative"
+            ].action = f"{self.config['sent_map']['negative']}"
+
 
 if __name__ == "__main__":
-
     intent_names = [
-        # intro
-        # "topic-intro-engage-smalltalk-must-fallback",
-        # "topic-intro-name-double-check-fallback",
-        # age
-        # "topic-day-one-session-one-age-again-fallback",
-        # "topic-day-one-session-one-age-fallback",
-        # "topic-day-one-session-one-age-parents-fallback"
-        # "topic-day-one-session-one-age-grandparents-fallback",
-        # "topic-day-one-session-one-age-parents-job-sarcastic-handle-fallback",
-        # names origins
-        # "topic-day-one-session-one-names-origins-meaning-fallback",
-        # "topic-day-one-session-one-names-origins-meaning-haru-fallback",
-        # "topic-day-one-session-one-names-happy-with-name-fallback",
-        # "topic-day-one-session-one-remembering-names-fallback",
-        # "topic-day-one-session-one-haru-name-fallback",
-        # "topic-day-one-session-one-last-name-fallback",
-        # "topic-day-one-session-one-confirm-last-name-fallback",
-        # "topic-day-one-session-one-family-name-capture-again-fallback",
-        # "topic-day-one-session-one-family-name-double-check-fallback",
-        # "topic-day-one-session-one-collect-name-origin-fallback",
-        # "topic-day-one-session-one-haru-origin-fallback",
-        # "topic-day-one-session-one-ever-been-fallback",
-        # "topic-day-one-session-one-collect-name-origin-sarcastic-handle-fallback",
-        # "topic-day-one-session-one-collect-name-origin-confirm-fallback",
-        # "topic-day-one-session-one-haru-origin-sarcastic-handle-fallback",
-        # hometown
-        # "topic-hometown-fallback",
-        # "topic-hometown-still-live-there-fallback",
-        # "topic-hometown-still-live-there-no-fallback",
-        # "topic-hometown-unknown-type-of-building",
-        # "topic-hometown-looking-for-a-new-roommate-fallback",
-        # "topic-hometown-new-roommate-yes-reaction",
-        # "topic-hometown-looking-for-a-new-roommate-no-reaction",
-        "topic-hometown-not-from-homecountry-capture-birthcountry",
-        "topic-hometown-homecountry-live-now-fallback",
-        "topic-hometown-what-question-fallback",
-        # travel homecountry
-        # "topic-travel-homecountry-human-guesses-harus-from-non-japan-country",
-        # "topic-travel-homecountry-human-from-other-country",
-        # "topic-travel-homecountry-human-unsure-about-haru-visiting",
-        # "topic-travel-homecountry-favorite-hemisphere-any-answer",
-        # "topic-travel-homecountry-human-been-to-sweden-fallback",
-        # "topic-travel-homecountry-human-seen-the-northern-lights-fallback",
-        # "topic-travel-homecountry-wants-to-know-where-the-lights-come-from",
-        # "topic-travel-homecountry-loves-how-humans-interact-with-nature",
+        # food
+        # "topic-day-three-food-fallback",
+        # "topic-day-three-haru-food-know-fallback",
+        # "topic-day-three-haru-food-donot-know-fallback",
+        # "topic-day-three-haru-food-guess",
+        # "topic-day-three-haru-food-guess-fallback",
+        # "topic-day-three-haru-yesterday-fallback",
+        # "topic-day-three-favorite-food-collected-fallback",
+        # "topic-day-three-favorite-food-collected-where-fallback",
+        # "topic-day-three-favorite-food-nooldes-china-explain-fallback",
+        # "topic-day-three-favorite-food-burgers-america-explain-fallback",
+        # "topic-day-three-favorite-food-pizza-italy-explain-fallback",
+        # "topic-day-three-favorite-food-nooldes-where-fallback",
+        # friends
+        # "topic-day-four-friends-fallback",
+        # "topic-day-four-haru-is-friend-fallback",
+        # "topic-day-four-friend-visited-fallback",
+        # "topic-day-four-friends-make-laugh-fallback",
+        # "topic-day-four-friends-user-joke-fallback",
+        # schools
+        # "topic-day-four-school-favorite-subject-fallback",
+        # "topic-day-four-school-favorite-subject-handle-fallback",
+        # "topic-day-four-school-extra-curriculars-fallback",
+        # "topic-day-four-school-desired-carrier-fallback",
+        # music
+        # "topic-music-genre-fallback",
+        # "topic-music-fallback",
+        # "topic-music-genre-instrument-fallback",
+        # "topic-music-select-instrument-fallback",
+        # "topic-music-genre-rhymes-fallback",
+        # "topic-music-genre-rhymes-explain-fallback",
+        # "topic-music-dancing-fallback",
+        # "topic-music-fav-dance-movie-catch",
+        # "topic-music-chatbot-fallback",
+        # "topic-music-chatbot-buy-music-fallback",
+        # "topic-music-hear-fact-fallback",
+        # "topic-music-music-cd-fallback",
+        # "topic-music-music-cd-spins-fallback",
+        # language
+        # "topic-language-fallback",
+        # "topic-language-user-only-speaks-english-fallback",
+        # "topic-language-user-speak-something-else",
+        # "topic-language-user-speak-spanish-fallback",
+        # "topic-language-user-speak-something-else-fallback",
+        # "topic-language-check-favorite-animal-collected-yes-yes-fallback",
+        # "topic-language-check-favorite-animal-collected-no-fallback",
+        # "topic-language-user-speak-japanese-fallback",
+        # "topic-language-reset-in-language-fallback",
+        # "topic-language-second-reset-in-language-fallback",
+        # clothing
+        # "topic-day-five-clothing-user-wear-fallback",
+        # "topic-day-five-clothing-favorite-season-fall-winter",
+        # weather
+        # "topic-day-five-weather-sun-rain-fallback",
+        # "topic-day-five-weather-favorite-season-fallback",
+        # travel
+        # "topic-day-five-travel-next-fallback",
+        # "topic-day-five-travel-food-sightseeing-fallback",
+        # "topic-day-five-travel-favorite-continent-fallback",
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
@@ -145,10 +177,19 @@ if __name__ == "__main__":
 
     config = {
         "api": None,
-        "credential": os.path.join(keys_dir, "es.json"),
+        # "credential": os.path.join(keys_dir, "es.json"),
+        "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
 
     gen = SentimentGeneratorUnsafe(config)
+
+    day, session, topic = 5, 2, "travel"
+    print("backing up... ", end="")
+    gen.api.create_version(
+        f"backup before adding unsafe sent paths to day={day} session={session} topic={topic}".title()
+    )
+    print("done")
     gen.run()

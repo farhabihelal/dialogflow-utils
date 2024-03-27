@@ -26,7 +26,6 @@ class EntityDetectorGenerator:
         self.config = config
 
     def create_entity_detector(self, parent: Intent, language_code: str = None):
-
         # fallback node
         fallback_nodes = [x for x in parent.children if x.intent_obj.is_fallback]
         fallback_intent: Intent = None
@@ -70,6 +69,9 @@ class EntityDetectorGenerator:
             f"{capture_intent_obj.display_name}-success"
         )
         capture_success_intent_obj.events = [capture_success_intent_obj.display_name]
+        capture_success_intent_obj.messages = [
+            dialogflow_v2.Intent.Message(payload={"node_type": "AnswerNode"})
+        ]
         capture_success_intent = Intent(capture_success_intent_obj)
 
         # capture failure node
@@ -78,7 +80,9 @@ class EntityDetectorGenerator:
             f"{capture_intent_obj.display_name}-failure"
         )
         capture_failure_intent_obj.events = [capture_failure_intent_obj.display_name]
-        capture_failure_intent_obj.action = f""
+        capture_failure_intent_obj.messages = [
+            dialogflow_v2.Intent.Message(payload={"node_type": "AnswerNode"})
+        ]
         capture_failure_intent = Intent(capture_failure_intent_obj)
 
         intents = [capture_success_intent, capture_failure_intent]
@@ -93,8 +97,11 @@ class EntityDetectorGenerator:
             fallback_intent_obj.display_name = f"{parent.display_name}-fallback"
             fallback_intent_obj.events = [fallback_intent_obj.display_name]
             fallback_intent_obj.action = f""
+            fallback_intent_obj.is_fallback = True
             fallback_intent_obj.messages = [
-                dialogflow_v2.Intent.Message(payload={"local_entity_detection": ""})
+                dialogflow_v2.Intent.Message(
+                    payload={"local_entity_detection": "", "node_type": "FallbackNode"}
+                )
             ]
 
             fallback_intent = Intent(fallback_intent_obj)
@@ -135,23 +142,42 @@ class EntityDetectorGenerator:
 
 
 if __name__ == "__main__":
-
     intent_names = [
         # pet
-        "topic-pet-multiple-age",
-        "topic-pet-how-old-question",
+        # "topic-pet-multiple-age",
+        # "topic-pet-how-old-question",
         # lemurs
+        # friends
+        # "topic-day-four-friends-name"
+        # travel
+        # "topic-day-five-travel-last-place",
+        # "topic-day-five-travel-favorite-food-not-collected",
+        # "topic-day-five-favorite-continent-south-america",
+        # "topic-day-five-favorite-continent-africa",
+        # "topic-day-five-favorite-continent-asia",
+        # olympics
+        # "topic-olympics-handler-three",
+        # "topic-olympics-would-compete-well-in-favorite-sport",
+        # food
+        "topic-day-three-food-summingup"
     ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
-        # "credential": os.path.join(keys_dir, "es.json"),
-        "credential": os.path.join(keys_dir, "haru-test.json"),
+        "credential": os.path.join(keys_dir, "es.json"),
+        # "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
 
     gen = EntityDetectorGenerator(config)
+    day, session, topic = 3, 1, "food"
+    print("backing up... ", end="")
+    gen.api.create_version(
+        f"backup before adding entity detections to day {day} session {session} {topic} topic.".title()
+    )
+    print("done")
     gen.run()

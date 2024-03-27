@@ -1,0 +1,21 @@
+{
+  "intents": [
+    {
+      "parent_name": "topic-day-two-family-yes",
+      "display_name": "topic-day-two-family-siblings-question",
+      "action": "topic-day-two-family-siblings",
+      "messages": {
+        "text": [
+          [
+            "So, #globals.person_name, did your creators have any other offspring?",
+            "Did your creators have any other offspring?"
+          ]
+        ],
+        "payload": {
+          "node_type": "QuestionNode"
+        }
+      },
+      "is_fallback": false
+    }
+  ]
+}

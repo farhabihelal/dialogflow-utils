@@ -25,7 +25,7 @@ class SentimentGenerator:
     def configure(self, config: dict):
         self.config = config
 
-    def add_metadata(self, parent: Intent, sentiment_intents: dict):
+    def add_metadata(self, parent: Intent, sentiment_intents: dict) -> Intent:
         payload = parent.custom_payload
         metadata = {
             "sentiment_classification_override": {
@@ -42,6 +42,7 @@ class SentimentGenerator:
         self.api.update_intent(
             intent=parent.intent_obj, language_code=self.config["language_code"]
         )
+        return parent
 
     def get_sentiment_intents(self, parent: Intent) -> dict:
         return {x: self.get_sentiment_intent(x, parent) for x in self.valid_sentiments}
@@ -57,7 +58,7 @@ class SentimentGenerator:
         intent_obj.events = [intent_obj.display_name]
         intent_obj.action = self.get_action(parent)
         intent_obj.messages.append(
-            dialogflow_v2.Intent.Message(payload={"node_type": "RepeatNode"})
+            dialogflow_v2.Intent.Message(payload={"node_type": "AnswerNode"})
         )
         intent_obj.messages.append(
             dialogflow_v2.Intent.Message(
@@ -93,7 +94,7 @@ class SentimentGenerator:
 
         parent_names = intent_names if intent_names else self.config["intent_names"]
 
-        for parent_name in parent_names:
+        for i, parent_name in enumerate(parent_names):
             parent_name: str
             parent: Intent = self.api.intents["display_name"].get(parent_name)
             if not parent:
@@ -114,22 +115,64 @@ class SentimentGenerator:
             self.api.update_intent(
                 intent=parent.intent_obj, language_code=language_code
             )
-            sleep(2)
+
+            print(f"{parent_name}: success")
+
+            if i + 1 < len(parent_names):
+                sleep(10)
 
 
 if __name__ == "__main__":
-
-    intent_names = []
+    intent_names = [
+        # "topic-day-three-food-summingup",
+        # "topic-day-three-haru-food-merge"
+        # friends
+        # "topic-day-four-friend-like",
+        # "topic-day-four-haru-is-friend-do",
+        # "topic-day-four-good-friend",
+        # "topic-day-four-friends-joke",
+        # "topic-day-four-friends-joke-explain",
+        # "topic-day-four-friends-user-tells-joke",
+        # schools
+        # "topic-day-four-school-user-fact"
+        # music
+        # "topic-music-genre-jazz-hum",
+        # "topic-music-eyes-round",
+        # "topic-music-chatbot-stand",
+        # "topic-music-fav-dance-movie",
+        # language
+        # "topic-language-user-doesnot-want-to-learn-second-language",
+        # "topic-language-call-for-user-only-speaks-english-fallback",
+        # "topic-language-learn-english-at-school",
+        # clothing
+        # "topic-day-five-clothing-wearing-wool",
+        # "topic-day-five-clothing-wearing-linen",
+        # weather
+        # "topic-day-five-weather-extreme-temperature",
+        # travel
+        # "topic-day-five-travel-enjoy-not",
+        # "topic-day-five-travel-next-destination-collected",
+        # "topic-day-five-travel-harus-favorite",
+    ]
 
     base_dir = os.path.abspath(f"{os.path.dirname(__file__)}/../..")
     keys_dir = os.path.join(base_dir, ".temp/keys")
 
     config = {
         "api": None,
-        "credential": os.path.join(keys_dir, "es.json"),
+        # "credential": os.path.join(keys_dir, "es.json"),
+        "credential": os.path.join(keys_dir, "es2.json"),
+        # "credential": os.path.join(keys_dir, "haru-test.json"),
         "intent_names": intent_names,
         "language_code": "en",
     }
 
     gen = SentimentGenerator(config)
+
+    day, session, topic = 5, 2, "travel"
+    print("backing up... ", end="")
+    gen.api.create_version(
+        f"backup before adding safe sent paths to day {day} session {session} {topic} topic".title()
+    )
+    print("done")
     gen.run()
